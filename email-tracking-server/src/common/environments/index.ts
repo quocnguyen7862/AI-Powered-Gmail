@@ -1,0 +1,92 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
+
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const APP_PORT = process.env.APP_PORT || 3001;
+const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || '';
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || '';
+const JWT_ACCESS_SECRET_EXPIRATION_TIME =
+  process.env.JWT_ACCESS_SECRET_EXPIRATION_TIME || '';
+const JWT_REFRESH_SECRET_EXPIRATION_TIME =
+  process.env.JWT_REFRESH_SECRET_EXPIRATION_TIME || '';
+const JWT_VERIFICATION_TOKEN_SECRET =
+  process.env.JWT_VERIFICATION_TOKEN_SECRET || '';
+const MAIL_HOST = process.env.MAIL_HOST || '';
+const MAIL_PORT = process.env.MAIL_PORT || '';
+const MAIL_USER = process.env.MAIL_USER || '';
+const MAIL_PASSWORD = process.env.MAIL_PASSWORD || '';
+const DEFAULT_MAIL_FROM = process.env.DEFAULT_MAIL_FROM || '';
+const APP_NAME = process.env.APP_NAME || '';
+const JWT_VERIFICATION_TOKEN_EXPIRATION_TIME =
+  process.env.JWT_VERIFICATION_TOKEN_EXPIRATION_TIME || '';
+const EMAIL_CONFIRMATION_URL = process.env.EMAIL_CONFIRMATION_URL || '';
+const PRIVATE_TOKEN_SECRET = process.env.PRIVATE_TOKEN_SECRET || '';
+const MAX_FILE_SIZE =
+  +process.env.MAX_FILE_SIZE * 1024 * 1024 || 5 * 1024 * 1024;
+const MAX_COUNT = +process.env.MAX_COUNT || 10;
+
+const CWD = process.cwd() || '';
+
+const AWS_DEFAULT_S3_BUCKET = process.env.AWS_DEFAULT_S3_BUCKET || '';
+const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID || '';
+const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY || '';
+const AWS_S3_REGION = process.env.AWS_S3_REGION || '';
+
+const CLOUDINARY_DEFAULT_BUCKET = process.env.CLOUDINARY_DEFAULT_BUCKET || '';
+const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || '';
+const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY || '';
+const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET || '';
+
+const DB_HOST = process.env.DB_HOST || '';
+const DB_PORT = +process.env.DB_PORT || 5432;
+const DB_USER = process.env.DB_USER || '';
+const DB_PASS = process.env.DB_PASS || '';
+const DB_NAME = process.env.DB_NAME || '';
+const DB_SSL = Boolean(process.env.DB_SSL) || false;
+
+const RESET_PASSWORD_EXPIRATION_TIME =
+  process.env.RESET_PASSWORD_EXPIRATION_TIME || 60;
+
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
+const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || '';
+
+export {
+  NODE_ENV,
+  APP_PORT,
+  JWT_ACCESS_SECRET,
+  JWT_REFRESH_SECRET,
+  JWT_ACCESS_SECRET_EXPIRATION_TIME,
+  JWT_REFRESH_SECRET_EXPIRATION_TIME,
+  JWT_VERIFICATION_TOKEN_SECRET,
+  MAIL_HOST,
+  MAIL_PORT,
+  MAIL_USER,
+  MAIL_PASSWORD,
+  DEFAULT_MAIL_FROM,
+  APP_NAME,
+  JWT_VERIFICATION_TOKEN_EXPIRATION_TIME,
+  EMAIL_CONFIRMATION_URL,
+  PRIVATE_TOKEN_SECRET,
+  CWD,
+  MAX_FILE_SIZE,
+  MAX_COUNT,
+  AWS_DEFAULT_S3_BUCKET,
+  AWS_ACCESS_KEY_ID,
+  AWS_SECRET_ACCESS_KEY,
+  AWS_S3_REGION,
+  DB_HOST,
+  DB_PORT,
+  DB_USER,
+  DB_PASS,
+  DB_NAME,
+  DB_SSL,
+  RESET_PASSWORD_EXPIRATION_TIME,
+  CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET,
+  CLOUDINARY_DEFAULT_BUCKET,
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  GOOGLE_REDIRECT_URI,
+};

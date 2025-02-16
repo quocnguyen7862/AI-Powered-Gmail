@@ -1,0 +1,33 @@
+export const MessageError = {
+  DEFAULT: (message: MessageName) => `${message}`,
+  NOT_FOUND: (content: MessageName) => `${content} not found`,
+  EXISTS: (content: MessageName) => `${content} already exists`,
+  INCORRECT: (content: MessageName) => `${content} is incorrect`,
+  VERIFIED: (content: MessageName) => `${content} already verified`,
+  EXPIRED: (content: MessageName) => `${content} has expired`,
+  INVALID: (content: MessageName) => `${content} is invalid`,
+  ACCESS_DENIED: () => `access denied`,
+  SEND_MAIL_FAILED: () => `send mail failed`,
+};
+
+export enum MessageName {
+  USER = 'user',
+  WORKSPACE = 'workspace',
+  BOARD = 'board',
+  WORKSPACE_MEMBER = 'workspace member',
+  IMAGE = 'image',
+  FORMAT = 'format',
+  LIST = 'list',
+  TAG = 'tag',
+  COMMENT = 'comment',
+  CARD = 'card',
+  ROLE = 'role',
+  PERMISSION = 'permission',
+  TAG_CARD = 'tag card',
+  FILE = 'file',
+  PASSWORD = 'password',
+  CARD_MEMBER = 'card member',
+  NOTIFICATION = 'notification',
+  BOARD_MEMBER = 'board member',
+  RESET_PASSWORD_TOKEN = 'reset password token',
+}
