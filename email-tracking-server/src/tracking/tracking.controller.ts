@@ -21,4 +21,14 @@ export class TrackingController {
       body: pixel,
     };
   }
+
+  @Get('messages')
+  async listEmails() {
+    return await this.trackingService.listEmails();
+  }
+
+  @Get('message/:id')
+  async getMessage(@Query('id') id: string) {
+    return await this.trackingService.getMessage(id);
+  }
 }

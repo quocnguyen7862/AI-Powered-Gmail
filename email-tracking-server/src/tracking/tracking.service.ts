@@ -19,4 +19,12 @@ export class TrackingService {
 
     this.logger.log(`Email opened: ${email.snippet}`);
   }
+
+  async listEmails() {
+    return await this.gmailService.listEmails();
+  }
+
+  async getMessage(id: string) {
+    return await this.gmailService.getMessage(id);
+  }
 }

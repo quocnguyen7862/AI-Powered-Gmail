@@ -1,24 +1,16 @@
-import {
-  GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET,
-  GOOGLE_REDIRECT_URI,
-} from '@environments';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Credentials, OAuth2Client } from 'google-auth-library';
 import { google } from 'googleapis';
 
 @Injectable()
 export class GmailService {
-  constructor(private readonly oauth2Client: OAuth2Client) {
-    this.oauth2Client = new google.auth.OAuth2(
-      GOOGLE_CLIENT_ID,
-      GOOGLE_CLIENT_SECRET,
-      GOOGLE_REDIRECT_URI,
-    );
-  }
+  constructor(
+    @Inject('OAUTH2_CLIENT')
+    private readonly oauth2Client: OAuth2Client,
+  ) {}
 
   async getAuthUrl(): Promise<string> {
-    const scopes = [''];
+    const scopes = ['https://www.googleapis.com/auth/gmail.readonly'];
 
     const url = this.oauth2Client.generateAuthUrl({
       access_type: 'offline',
@@ -40,6 +32,28 @@ export class GmailService {
     const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
 
     const res = await gmail.users.messages.list({ userId: 'me' });
+
+    return res.data;
+  }
+
+  async getMessage(id: string) {
+    const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
+
+    const res = await gmail.users.messages.get({
+      userId: 'me',
+      id,
+      format: 'metadata', // Chỉ lấy metadata
+      metadataHeaders: ['X-Google-Read'], // Kiểm tra trạng thái đọc
+    });
+
+    const labelIds = res.data.labelIds;
+
+    const unreadHeader = labelIds.find((label) => label === 'UNREAD');
+    if (!unreadHeader) {
+      console.log('Email đã được đọc');
+    } else {
+      console.log('Email chưa được đọc');
+    }
 
     return res.data;
   }

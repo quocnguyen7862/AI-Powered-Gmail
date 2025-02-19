@@ -6,7 +6,7 @@ const isProduction = NODE_ENV === 'production';
 
 const fileTransport = new transports.File({
   filename: isProduction ? 'production.log' : 'development.log',
-  dirname: join(__dirname, 'common', 'logs'),
+  dirname: join(__dirname, '../../logs'),
 });
 
 const consoleTransport = new transports.Console({

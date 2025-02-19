@@ -5,6 +5,7 @@ import { TrackingModule } from './tracking/tracking.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './common/database/database.module';
 import { GmailService } from './gmail/gmail.service';
+import { GmailModule } from './gmail/gmail.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { GmailService } from './gmail/gmail.service';
     }),
     TrackingModule,
     DatabaseModule,
+    GmailModule,
   ],
   controllers: [AppController],
   providers: [AppService, GmailService],
