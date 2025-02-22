@@ -1,0 +1,10 @@
+fastapi[standard]
+uvicorn[standard]
+Gunicorn
+pydantic
+pydantic-settings
+sparqlwrapper
+nltk
+numpy
+beautifulsoup4
+requests
