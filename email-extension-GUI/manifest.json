@@ -1,10 +1,30 @@
 {
-    "name": "Hello Extensions",
+    "name": "AI-Powered Gmail",
     "description": "Base Level Extension",
     "version": "1.0",
     "manifest_version": 3,
+    "permissions":[
+      "activeTab",
+      "storage",
+      "identity",
+      "scripting"
+    ],
     "action": {
-      "default_popup": "hello.html",
-      "default_icon": "icon.png"
+      "default_popup": "src/popup.html",
+      "default_icon": {
+
+      }
+    },
+    "background": {
+    },
+    "content_scripts": [
+      {
+        "matches": ["https://mail.google.com/*"],
+        "js": ["src/js/popup.js"],
+        "css": ["src/styles/popup.css"]
+      }
+    ],
+    "icons":{
+
     }
 }

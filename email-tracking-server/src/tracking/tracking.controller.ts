@@ -1,34 +1,43 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { TrackingService } from './tracking.service';
 
 @Controller('tracking')
 export class TrackingController {
   constructor(private readonly trackingService: TrackingService) {}
 
-  @Get('pixel')
-  async trackEmail(@Query('emailId') emailId: string) {
-    await this.trackingService.logEmailOpen(emailId);
-
-    const pixel = Buffer.from(
-      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAgAB/1h1ZAAAAABJRU5ErkJggg==',
-      'base64',
+  @Post('save-sent')
+  async saveSentEmail(
+    @Body('userId') userId: string,
+    @Body('emailId') emailId: string,
+    @Body('to') to: string,
+    @Body('subject') subject: string,
+    @Body('trackingId') trackingId: string,
+  ) {
+    await this.trackingService.saveSentEmail(
+      userId,
+      emailId,
+      to,
+      subject,
+      trackingId,
     );
-
-    return {
-      headers: {
-        'Content-Type': 'image/png',
-      },
-      body: pixel,
-    };
+    return 'Email saved';
   }
 
-  @Get('messages')
-  async listEmails() {
-    return await this.trackingService.listEmails();
+  @Get('sent/:id/status')
+  async getSentEmailStatus(
+    @Param('id') emailId: string,
+    @Query('userId') userId: string,
+  ) {
+    const isRead = await this.trackingService.getSentEmailStatus(
+      emailId,
+      userId,
+    );
+    return { isRead };
   }
 
-  @Get('message/:id')
-  async getMessage(@Query('id') id: string) {
-    return await this.trackingService.getMessage(id);
+  @Get('/track/:trackingId')
+  async trackEmailOpen(@Param('trackingId') trackingId: string) {
+    await this.trackingService.trackEmailOpen(trackingId);
+    // Trả về pixel 1x1 (có thể dùng Buffer để trả về hình ảnh thực tế nếu cần)
   }
 }

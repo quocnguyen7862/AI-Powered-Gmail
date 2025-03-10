@@ -4,7 +4,7 @@ import uvicorn
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from app.apis.routers import router
+from app.apis.sumarize_router import summarize_router
 from app.core.config import settings
 
 logging.config.fileConfig(settings.LOGGING_CONFIG_FILE, disable_existing_loggers=False)
@@ -22,7 +22,7 @@ def get_application() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    application.include_router(router, prefix=settings.API_PREFIX)
+    application.include_router(summarize_router, prefix=settings.API_PREFIX)
 
     return application
 

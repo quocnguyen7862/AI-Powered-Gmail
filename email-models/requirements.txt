@@ -8,3 +8,12 @@ nltk
 numpy
 beautifulsoup4
 requests
+transformers
+python-multipart
+PyPDF2 
+python-docx 
+pandas 
+pytesseract 
+pillow
+torch
+openai

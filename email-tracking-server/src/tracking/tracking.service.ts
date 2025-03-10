@@ -1,30 +1,58 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CustomLoggerService } from '@logger/logger.service';
 import { GmailService } from '@/gmail/gmail.service';
+import { BaseService } from '@/common/base/base.service';
+import { TrackingEntity } from './entities/tracking.entity';
+import { MessageName } from '@enums/message';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
-export class TrackingService {
+export class TrackingService extends BaseService<TrackingEntity> {
   constructor(
+    @InjectRepository(TrackingEntity)
+    private readonly trackingRepository: Repository<TrackingEntity>,
     private readonly logger: CustomLoggerService,
     private readonly gmailService: GmailService,
-  ) {}
-
-  async logTrackingEvent(emailId: string): Promise<void> {
-    this.logger.log(`Email ID: ${emailId} has been opened.`);
+  ) {
+    super(MessageName.TRACKING, trackingRepository);
   }
 
-  async logEmailOpen(emailId: string) {
-    const emails = await this.gmailService.listEmails();
-    const email = emails.messages.find((msg) => msg.id === emailId);
-
-    this.logger.log(`Email opened: ${email.snippet}`);
+  async saveSentEmail(
+    userId: string,
+    emailId: string,
+    to: string,
+    subject: string,
+    trackingId: string,
+  ): Promise<void> {
+    const tracking = this.trackingRepository.create({
+      emailId,
+      userId,
+      isRead: false,
+      isSent: true,
+    });
+    await this.trackingRepository.save(tracking);
   }
 
-  async listEmails() {
-    return await this.gmailService.listEmails();
+  async getSentEmailStatus(emailId: string, userId: string): Promise<boolean> {
+    const email = await this.trackingRepository.findOne({
+      where: { emailId, userId, isSent: true },
+    });
+    if (!email) {
+      throw new NotFoundException(
+        `Sent email with ID ${emailId} not found for user ${userId}`,
+      );
+    }
+    return email.isRead;
   }
 
-  async getMessage(id: string) {
-    return await this.gmailService.getMessage(id);
+  async trackEmailOpen(trackingId: string): Promise<void> {
+    const email = await this.trackingRepository.findOne({
+      where: { emailId: trackingId, isSent: true },
+    });
+    if (email && !email.isRead) {
+      email.isRead = true;
+      await this.trackingRepository.save(email);
+    }
   }
 }

@@ -17,4 +17,23 @@ export class GmailController {
     const tokens = await this.gmailService.getTokens(code);
     return tokens;
   }
+
+  @Get('email-status')
+  async getEmailStatus(
+    @Query('emailId') emailId: string,
+  ): Promise<{ isRead: boolean }> {
+    const isRead = await this.gmailService.getEmailStatus('me', emailId);
+    return { isRead };
+  }
+
+  @Get('list-emails')
+  async listEmails(): Promise<any[]> {
+    return this.gmailService.listEmails('me');
+  }
+
+  @Get('mark-as-read')
+  async markEmailAsRead(@Query('emailId') emailId: string): Promise<string> {
+    await this.gmailService.markEmailAsRead('me', emailId);
+    return 'Email marked as read';
+  }
 }

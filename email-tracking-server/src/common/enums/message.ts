@@ -30,4 +30,5 @@ export enum MessageName {
   NOTIFICATION = 'notification',
   BOARD_MEMBER = 'board member',
   RESET_PASSWORD_TOKEN = 'reset password token',
+  TRACKING = 'tracking',
 }

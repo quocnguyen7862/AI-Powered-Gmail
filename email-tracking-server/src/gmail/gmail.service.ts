@@ -10,7 +10,10 @@ export class GmailService {
   ) {}
 
   async getAuthUrl(): Promise<string> {
-    const scopes = ['https://www.googleapis.com/auth/gmail.readonly'];
+    const scopes = [
+      'https://www.googleapis.com/auth/gmail.readonly',
+      'https://www.googleapis.com/auth/gmail.modify',
+    ];
 
     const url = this.oauth2Client.generateAuthUrl({
       access_type: 'offline',
@@ -28,33 +31,41 @@ export class GmailService {
     return tokens;
   }
 
-  async listEmails() {
-    const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
-
-    const res = await gmail.users.messages.list({ userId: 'me' });
-
-    return res.data;
+  setCredentials(tokens: Credentials): void {
+    this.oauth2Client.setCredentials(tokens);
   }
 
-  async getMessage(id: string) {
+  async getEmailStatus(userId: string, emailId: string): Promise<boolean> {
     const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
-
     const res = await gmail.users.messages.get({
       userId: 'me',
-      id,
-      format: 'metadata', // Chỉ lấy metadata
-      metadataHeaders: ['X-Google-Read'], // Kiểm tra trạng thái đọc
+      id: emailId,
+      format: 'metadata',
     });
 
-    const labelIds = res.data.labelIds;
+    const isUnread = res.data.labelIds.includes('UNREAD') || false;
+    return !isUnread;
+  }
 
-    const unreadHeader = labelIds.find((label) => label === 'UNREAD');
-    if (!unreadHeader) {
-      console.log('Email đã được đọc');
-    } else {
-      console.log('Email chưa được đọc');
-    }
+  async listEmails(userId: string, maxResults: number = 10): Promise<any[]> {
+    const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
 
-    return res.data;
+    const res = await gmail.users.messages.list({
+      userId: 'me',
+      maxResults,
+    });
+
+    return res.data.messages || [];
+  }
+
+  async markEmailAsRead(userId: string, emailId: string): Promise<void> {
+    const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
+    await gmail.users.messages.modify({
+      userId: 'me',
+      id: emailId,
+      requestBody: {
+        removeLabelIds: ['UNREAD'],
+      },
+    });
   }
 }
