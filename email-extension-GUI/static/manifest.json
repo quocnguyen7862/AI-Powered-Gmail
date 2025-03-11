@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "AI-Powered Gmail Extension",
+  "version": "1.0",
+  "content_scripts": [
+      {
+        "matches": [
+          "https://mail.google.com/*"
+        ],
+        "js": ["content.js"],
+        "run_at": "document_end"
+      }
+    ],
+    "background": {
+      "service_worker": "background.js"
+    },
+    "permissions": [
+      "scripting"
+    ],
+    "host_permissions": [
+      "https://mail.google.com/"
+    ],
+    "web_accessible_resources": [
+      {
+        "resources": ["*.map"],
+        "matches": ["https://mail.google.com/*"]
+      }
+    ]
+}
