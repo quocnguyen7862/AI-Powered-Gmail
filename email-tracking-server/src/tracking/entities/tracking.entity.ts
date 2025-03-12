@@ -6,6 +6,9 @@ export class TrackingEntity extends BaseEntity {
   @Column({ unique: true })
   emailId: string;
 
+  @Column({ unique: true })
+  trackingId: string;
+
   @Column()
   userId: string;
 

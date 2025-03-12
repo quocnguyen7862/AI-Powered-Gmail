@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
 import { TrackingService } from './tracking.service';
+import { Response } from 'express';
 
 @Controller('tracking')
 export class TrackingController {
@@ -36,8 +37,18 @@ export class TrackingController {
   }
 
   @Get('/track/:trackingId')
-  async trackEmailOpen(@Param('trackingId') trackingId: string) {
+  async trackEmailOpen(
+    @Param('trackingId') trackingId: string,
+    @Res() res: Response,
+  ) {
     await this.trackingService.trackEmailOpen(trackingId);
     // Trả về pixel 1x1 (có thể dùng Buffer để trả về hình ảnh thực tế nếu cần)
+
+    const pixel = Buffer.from(
+      'R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
+      'base64',
+    );
+    res.set('Content-Type', 'image/gif');
+    res.send(pixel);
   }
 }
