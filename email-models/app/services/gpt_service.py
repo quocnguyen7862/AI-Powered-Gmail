@@ -3,7 +3,7 @@ from typing import Optional
 
 class GPTSummarizationService:
 
-    def __init__(self, api_key: str, model_name: str = "gpt-3.5-turbo"):
+    def __init__(self, api_key: str, model_name: str = "gpt-4o-mini"):
         """
         Khởi tạo dịch vụ với API Key của OpenAI.
         
@@ -61,7 +61,7 @@ class GPTSummarizationService:
             raise Exception(f"Error summarizing text: {str(e)}")
         
 if __name__ == "__main__":
-    api_key = "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"
+    api_key = "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"
     gpt_service = GPTSummarizationService(api_key)
 
     # Ví dụ email

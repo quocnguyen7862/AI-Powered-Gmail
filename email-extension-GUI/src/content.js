@@ -1,11 +1,12 @@
 import * as InboxSDK from '@inboxsdk/core';
+import axios from 'axios';
 
 InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
   sdk.Compose.registerComposeViewHandler((composeView) => {
     composeView.on('presending', (event) => {
       const currentBody = composeView.getHTMLContent();
       const trackingId = Date.now().toString();
-      const trackingPixel = `<img src="http://localhost:3001/api/tracking/track/${trackingId}" width="1" height="1" style="display:none" />`;
+      const trackingPixel = `<img src="https://ai-powered-gmail.onrender.com/api/tracking/track/${trackingId}" width="1" height="1" style="display:none" />`;
       composeView.setBodyHTML(currentBody + trackingPixel);
 
       const to = composeView.getToRecipients().map(r => r.emailAddress).join(',');
@@ -65,10 +66,24 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
   sdk.Conversations.registerMessageViewHandler(async (messageView) => {
     const threadView = messageView.getThreadView();
     const threadId = await threadView.getThreadIDAsync();
+    const messageId = await messageView.getMessageIDAsync();
 
     const labels = messageView.getMessageLabels ? await messageView.getMessageLabels() : [];
     const isSent = labels.includes('SENT');
     const userId = 'user456';
+
+    messageView.addToolbarButton({
+      section: 'MORE',
+      title: 'Collect Email Data',
+      iconUrl: 'https://cdn4.iconfinder.com/data/icons/ionicons/512/icon-ios7-eye-256.png',
+      onClick: async (event) => {
+        const response = await axios.post('http://localhost:3001/api/summarize', {
+          threadId: threadId,
+          messageId: messageId,
+        })
+        console.log("🚀 ~ onClick: ~ response:", response)
+      }
+    })
 
     messageView.addToolbarButton({
       section: 'MORE',

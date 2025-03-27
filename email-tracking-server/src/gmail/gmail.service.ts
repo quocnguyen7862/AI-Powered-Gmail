@@ -58,6 +58,24 @@ export class GmailService {
     return res.data.messages || [];
   }
 
+  async getEmail(userId: string, emailId: string): Promise<any> {
+    const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
+
+    const res = await gmail.users.messages.get({
+      userId: userId,
+      id: emailId,
+    });
+
+    return {
+      id: res.data.id,
+      Subject: res.data.payload.headers.find(
+        (header) => header.name === 'Subject',
+      ).value,
+      content: res.data,
+      attachments: res.data.payload.parts.filter((part) => part.filename),
+    };
+  }
+
   async markEmailAsRead(userId: string, emailId: string): Promise<void> {
     const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
     await gmail.users.messages.modify({

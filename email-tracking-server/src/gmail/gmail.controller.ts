@@ -31,6 +31,11 @@ export class GmailController {
     return this.gmailService.listEmails('me');
   }
 
+  @Get('get-email')
+  async getEmail(@Query('emailId') emailId: string): Promise<any> {
+    return this.gmailService.getEmail('me', emailId);
+  }
+
   @Get('mark-as-read')
   async markEmailAsRead(@Query('emailId') emailId: string): Promise<string> {
     await this.gmailService.markEmailAsRead('me', emailId);
