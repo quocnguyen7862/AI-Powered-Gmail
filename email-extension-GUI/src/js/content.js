@@ -1,42 +1,36 @@
 import * as InboxSDK from '@inboxsdk/core';
 import axios from 'axios';
+import Api from './axios.config';
+import { URL_SAVE_SENT_EMAIL } from './config';
 
 InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
   sdk.Compose.registerComposeViewHandler((composeView) => {
+    let to = [];
+    let trackingId = Date.now().toString();
     composeView.on('presending', (event) => {
       const currentBody = composeView.getHTMLContent();
-      const trackingId = Date.now().toString();
-      const trackingPixel = `<img src="https://ai-powered-gmail.onrender.com/api/tracking/track/${trackingId}" width="1" height="1" style="display:none" />`;
+      trackingId = Date.now().toString();
+      const trackingPixel = `<img src="http://localhost:3001/api/tracking/track/${trackingId}.gif" width="1" height="1" style="display:none" />`;
       composeView.setBodyHTML(currentBody + trackingPixel);
 
-      const to = composeView.getToRecipients().map(r => r.emailAddress).join(',');
-      const subject = composeView.getSubject();
-      fetch('http://localhost:3001/api/tracking/save-sent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: 'user456',
-          emailId: trackingId,
-          to,
-          subject,
-          trackingId,
-        })
-      })
+      to = composeView.getToRecipients().map((recipient) => recipient.emailAddress);
     })
 
-    composeView.on('sent', function (event) {
-      const threadId = composeView.getThreadID();
-      const trackingId = Date.now().toString();
+    composeView.on('sent', async (event) => {
+      try {
+        const messsageId = await composeView.getDraftID();
+        const threadId = composeView.getThreadID();
 
-      fetch('http://localhost:3001/api/tracking/save-sent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: 'user456',
-          emailId: threadId,
-          trackingId,
-        }),
-      });
+        const response = await Api.postApiNonAuth(URL_SAVE_SENT_EMAIL, {
+          messageId: messsageId,
+          threadId: threadId,
+          trackingId: trackingId,
+          receiverAddress: to,
+        })
+      }
+      catch (error) {
+        console.log("🚀 ~ error:", error)
+      }
     });
   })
 

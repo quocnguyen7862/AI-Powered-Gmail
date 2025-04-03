@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Tracker</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body class="w-[320px] bg-white p-4 rounded shadow-md font-sans">
+    <div id="auth-section" class="text-center">
+      <h2 class="text-lg font-bold text-gray-800 mb-2">AI Email Powered</h2>
+      <button
+        id="authenticate"
+        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+      >
+        Authenticate with Gmail
+      </button>
+      <p id="message" class="text-xs text-gray-500 mt-2"></p>
+    </div>
+
+    <div id="tracker-section" class="hidden">
+      <h3 class="text-md font-semibold text-gray-700">AI Email Powered</h3>
+      <div class="mt-2">
+        <label class="flex items-center space-x-2">
+          <input type="checkbox" id="enable-tracking" class="toggle-checkbox" />
+          <span class="text-gray-800">Enable tracking for:</span>
+        </label>
+        <p class="ml-6 text-sm text-gray-600">ducquoc2002@gmail.com</p>
+      </div>
+
+      <div class="mt-4">
+        <h4 class="text-sm font-semibold text-gray-700">Tracking Options</h4>
+        <label class="flex items-center space-x-2 mt-2">
+          <input
+            type="checkbox"
+            id="link-tracking"
+            class="toggle-checkbox"
+            checked
+          />
+          <span class="text-gray-800">Link tracking</span>
+        </label>
+        <label class="flex items-center space-x-2 mt-2">
+          <input type="checkbox" id="hide-label" class="toggle-checkbox" />
+          <span class="text-gray-800">Hide "Not Tracked" label</span>
+        </label>
+        <label class="flex items-center space-x-2 mt-2">
+          <input type="checkbox" id="simple-labels" class="toggle-checkbox" />
+          <span class="text-gray-800">Simple labels</span>
+        </label>
+      </div>
+
+      <div class="mt-4">
+        <h4 class="text-sm font-semibold text-gray-700">Show notifications:</h4>
+        <label class="flex items-center space-x-2 mt-2">
+          <input type="checkbox" id="email-opened" class="toggle-checkbox" />
+          <span class="text-gray-800">When email is opened</span>
+        </label>
+        <label class="flex items-center space-x-2 mt-2">
+          <input type="checkbox" id="link-clicked" class="toggle-checkbox" />
+          <span class="text-gray-800">When a link is clicked</span>
+        </label>
+        <label class="flex items-center space-x-2 mt-2">
+          <input type="checkbox" id="email-sent" class="toggle-checkbox" />
+          <span class="text-gray-800">When a scheduled email is sent</span>
+        </label>
+        <label class="flex items-center space-x-2 mt-2">
+          <input
+            type="checkbox"
+            id="reminder-triggered"
+            class="toggle-checkbox"
+          />
+          <span class="text-gray-800">When a reminder is triggered</span>
+        </label>
+        <label class="flex items-center space-x-2 mt-2">
+          <input
+            type="checkbox"
+            id="dont-hide-notifications"
+            class="toggle-checkbox"
+            checked
+          />
+          <span class="text-gray-800"
+            >Do not automatically hide notifications</span
+          >
+        </label>
+      </div>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>

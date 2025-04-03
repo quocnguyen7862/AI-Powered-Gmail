@@ -13,6 +13,7 @@ export class GmailService {
     const scopes = [
       'https://www.googleapis.com/auth/gmail.readonly',
       'https://www.googleapis.com/auth/gmail.modify',
+      'https://www.googleapis.com/auth/userinfo.email',
     ];
 
     const url = this.oauth2Client.generateAuthUrl({
@@ -21,6 +22,15 @@ export class GmailService {
     });
 
     return url;
+  }
+
+  async getUserInfo(): Promise<{ id: string; email: string }> {
+    const oauth2 = google.oauth2({ version: 'v2', auth: this.oauth2Client });
+    const res = await oauth2.userinfo.get();
+    return {
+      id: res.data.id,
+      email: res.data.email,
+    };
   }
 
   async getTokens(code: string): Promise<Credentials> {

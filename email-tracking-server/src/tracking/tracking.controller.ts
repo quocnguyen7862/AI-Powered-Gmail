@@ -1,26 +1,15 @@
 import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
 import { TrackingService } from './tracking.service';
 import { Response } from 'express';
+import { CreateTrackingDto } from './dto/create-tracking.dto';
 
 @Controller('tracking')
 export class TrackingController {
   constructor(private readonly trackingService: TrackingService) {}
 
   @Post('save-sent')
-  async saveSentEmail(
-    @Body('userId') userId: string,
-    @Body('emailId') emailId: string,
-    @Body('to') to: string,
-    @Body('subject') subject: string,
-    @Body('trackingId') trackingId: string,
-  ) {
-    await this.trackingService.saveSentEmail(
-      userId,
-      emailId,
-      to,
-      subject,
-      trackingId,
-    );
+  async saveSentEmail(@Body() dto: CreateTrackingDto) {
+    await this.trackingService.saveSentEmail(dto);
     return 'Email saved';
   }
 
@@ -28,10 +17,12 @@ export class TrackingController {
   async getSentEmailStatus(
     @Param('id') emailId: string,
     @Query('userId') userId: string,
+    @Query('receiver') receiver: string,
   ) {
     const isRead = await this.trackingService.getSentEmailStatus(
       emailId,
       userId,
+      receiver,
     );
     return { isRead };
   }

@@ -6,38 +6,58 @@ import { TrackingEntity } from './entities/tracking.entity';
 import { MessageName } from '@enums/message';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcrypt';
+import { CreateTrackingDto } from './dto/create-tracking.dto';
+import { ReceiverEntity } from './entities/receiver.entity';
 
 @Injectable()
 export class TrackingService extends BaseService<TrackingEntity> {
   constructor(
     @InjectRepository(TrackingEntity)
     private readonly trackingRepository: Repository<TrackingEntity>,
+    @InjectRepository(ReceiverEntity)
+    private readonly receiverRepository: Repository<ReceiverEntity>,
     private readonly logger: CustomLoggerService,
     private readonly gmailService: GmailService,
   ) {
     super(MessageName.TRACKING, trackingRepository);
   }
 
-  async saveSentEmail(
-    userId: string,
-    emailId: string,
-    to: string,
-    subject: string,
-    trackingId: string,
-  ): Promise<void> {
+  async saveSentEmail(dto: CreateTrackingDto): Promise<void> {
+    const user = await this.gmailService.getUserInfo();
     const tracking = this.trackingRepository.create({
-      emailId,
-      trackingId,
-      userId,
-      isRead: false,
+      messageId: dto.messageId,
+      threadId: dto.threadId,
+      trackingId: dto.trackingId,
+      userId: user.id,
       isSent: true,
+      userAddress: user.email,
     });
-    await this.trackingRepository.save(tracking);
+    const data = await this.trackingRepository.save(tracking);
+
+    await Promise.all(
+      dto.receiverAddress.map(async (address) => {
+        const receiver = this.receiverRepository.create({
+          receiverAddress: address,
+          threadId: data.threadId,
+          isRead: false,
+        });
+        return await this.receiverRepository.save(receiver);
+      }),
+    );
   }
 
-  async getSentEmailStatus(emailId: string, userId: string): Promise<boolean> {
-    const email = await this.trackingRepository.findOne({
-      where: { emailId, userId, isSent: true },
+  async getSentEmailStatus(
+    emailId: string,
+    userId: string,
+    receiver: string,
+  ): Promise<boolean> {
+    const email = await this.receiverRepository.findOne({
+      where: {
+        receiverAddress: receiver,
+        threadId: emailId,
+        tracking: { isSent: true, userId: userId },
+      },
     });
     if (!email) {
       throw new NotFoundException(
@@ -48,12 +68,18 @@ export class TrackingService extends BaseService<TrackingEntity> {
   }
 
   async trackEmailOpen(trackingId: string): Promise<void> {
-    const email = await this.trackingRepository.findOne({
-      where: { trackingId: trackingId, isSent: true },
+    const email = await this.receiverRepository.findOne({
+      where: {
+        tracking: { isSent: true, trackingId: trackingId },
+      },
     });
     if (email && !email.isRead) {
       email.isRead = true;
-      await this.trackingRepository.save(email);
+      await this.receiverRepository.save(email);
     }
+  }
+
+  private hashUserAddress(userAddress: string): string {
+    return bcrypt.hashSync(userAddress, 10);
   }
 }

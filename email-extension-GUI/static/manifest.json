@@ -7,7 +7,11 @@
         "matches": [
           "https://mail.google.com/*"
         ],
-        "js": ["content.js"],
+        "js": [
+          "content.js",
+          "popup.js"
+        ],
+        "css":["popup.css"],
         "run_at": "document_end"
       }
     ],
@@ -15,6 +19,9 @@
       "service_worker": "background.js"
     },
     "permissions": [
+      "activeTab",
+      "storage",
+      "identity",
       "scripting"
     ],
     "host_permissions": [
@@ -25,5 +32,8 @@
         "resources": ["*.map"],
         "matches": ["https://mail.google.com/*"]
       }
-    ]
+    ],
+    "action":{
+      "default_popup": "popup.html"
+    }
 }
