@@ -36,7 +36,7 @@ export class TrackingController {
     // Trả về pixel 1x1 (có thể dùng Buffer để trả về hình ảnh thực tế nếu cần)
 
     const pixel = Buffer.from(
-      'http://localhost:3001/api/tracking/track/1743696080830.gif',
+      'R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
       'base64',
     );
     res.set('Content-Type', 'image/gif');
