@@ -41,7 +41,7 @@ jobs:
             sudo docker rm -f email-tracking-server || true
 
             sudo docker images --format '{{.Repository}}:{{.Tag}}' | grep 'siuit/email-tracking-server' | while read image; do
-              docker rmi -f "$image" || true
+              sudo docker rmi -f "$image" || true
             done
 
             sudo docker pull siuit/email-tracking-server:${{github.sha}}
