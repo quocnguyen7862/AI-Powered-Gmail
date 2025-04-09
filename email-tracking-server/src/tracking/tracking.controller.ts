@@ -32,7 +32,7 @@ export class TrackingController {
     @Param('trackingId') trackingId: string,
     @Res() res: Response,
   ) {
-    await this.trackingService.trackEmailOpen(trackingId);
+    await this.trackingService.trackEmailOpen(trackingId.split('.')[0]);
     // Trả về pixel 1x1 (có thể dùng Buffer để trả về hình ảnh thực tế nếu cần)
 
     const pixel = Buffer.from(
