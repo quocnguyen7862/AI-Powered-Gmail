@@ -65,8 +65,7 @@ When you're ready to deploy your NestJS application to production, there are som
 If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
 
 ```bash
-$ yarn install -g mau
-$ mau deploy
+$ docker build -t siuit/email-tracking-server .
 ```
 
 With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.

@@ -20,6 +20,9 @@ export class TrackingEntity extends BaseEntity {
   trackingId: string;
 
   @Column({ default: false })
+  isRead: boolean;
+
+  @Column({ default: false })
   isSent: boolean;
 
   @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })

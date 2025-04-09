@@ -68,9 +68,10 @@ export class TrackingService extends BaseService<TrackingEntity> {
   }
 
   async trackEmailOpen(trackingId: string): Promise<void> {
-    const email = await this.receiverRepository.findOne({
+    const email = await this.trackingRepository.findOne({
       where: {
-        tracking: { isSent: true, trackingId: trackingId },
+        trackingId: trackingId,
+        isSent: true,
       },
     });
     if (email && !email.isRead) {
