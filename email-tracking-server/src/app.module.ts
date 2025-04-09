@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './common/database/database.module';
 import { GmailService } from './gmail/gmail.service';
 import { GmailModule } from './gmail/gmail.module';
+import { SummarizeModule } from './summarize/summarize.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { GmailModule } from './gmail/gmail.module';
     TrackingModule,
     DatabaseModule,
     GmailModule,
+    SummarizeModule,
   ],
   controllers: [AppController],
   providers: [AppService, GmailService],

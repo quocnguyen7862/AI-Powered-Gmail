@@ -13,6 +13,7 @@ export class GmailService {
     const scopes = [
       'https://www.googleapis.com/auth/gmail.readonly',
       'https://www.googleapis.com/auth/gmail.modify',
+      'https://www.googleapis.com/auth/userinfo.email',
     ];
 
     const url = this.oauth2Client.generateAuthUrl({
@@ -21,6 +22,15 @@ export class GmailService {
     });
 
     return url;
+  }
+
+  async getUserInfo(): Promise<{ id: string; email: string }> {
+    const oauth2 = google.oauth2({ version: 'v2', auth: this.oauth2Client });
+    const res = await oauth2.userinfo.get();
+    return {
+      id: res.data.id,
+      email: res.data.email,
+    };
   }
 
   async getTokens(code: string): Promise<Credentials> {
@@ -56,6 +66,24 @@ export class GmailService {
     });
 
     return res.data.messages || [];
+  }
+
+  async getEmail(userId: string, emailId: string): Promise<any> {
+    const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
+
+    const res = await gmail.users.messages.get({
+      userId: userId,
+      id: emailId,
+    });
+
+    return {
+      id: res.data.id,
+      Subject: res.data.payload.headers.find(
+        (header) => header.name === 'Subject',
+      ).value,
+      content: res.data,
+      attachments: res.data.payload.parts.filter((part) => part.filename),
+    };
   }
 
   async markEmailAsRead(userId: string, emailId: string): Promise<void> {

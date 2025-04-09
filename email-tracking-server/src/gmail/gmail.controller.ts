@@ -1,15 +1,14 @@
-import { Controller, Get, Query, Res } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { GmailService } from './gmail.service';
-import { Response } from 'express';
 
 @Controller('gmail')
 export class GmailController {
   constructor(private readonly gmailService: GmailService) {}
 
   @Get('auth')
-  async googleAuth(@Res() res: Response) {
+  async googleAuth() {
     const authUrl = await this.gmailService.getAuthUrl();
-    return res.redirect(authUrl);
+    return authUrl;
   }
 
   @Get('auth/callback')
@@ -31,9 +30,20 @@ export class GmailController {
     return this.gmailService.listEmails('me');
   }
 
+  @Get('get-email')
+  async getEmail(@Query('emailId') emailId: string): Promise<any> {
+    return this.gmailService.getEmail('me', emailId);
+  }
+
   @Get('mark-as-read')
   async markEmailAsRead(@Query('emailId') emailId: string): Promise<string> {
     await this.gmailService.markEmailAsRead('me', emailId);
     return 'Email marked as read';
+  }
+
+  @Get('user-info')
+  async getUserInfo(): Promise<any> {
+    const data = await this.gmailService.getUserInfo();
+    return data;
   }
 }

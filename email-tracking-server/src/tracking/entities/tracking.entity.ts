@@ -1,13 +1,23 @@
 import { BaseEntity } from '@/common/base/base.entity';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
+import { ReceiverEntity } from './receiver.entity';
 
 @Entity({ name: 'tracking' })
 export class TrackingEntity extends BaseEntity {
-  @Column({ unique: true })
-  emailId: string;
-
   @Column()
   userId: string;
+
+  @Column()
+  userAddress: string;
+
+  @Column()
+  messageId: string;
+
+  @Column({ unique: true })
+  threadId: string;
+
+  @Column({ unique: true })
+  trackingId: string;
 
   @Column({ default: false })
   isRead: boolean;
@@ -17,4 +27,7 @@ export class TrackingEntity extends BaseEntity {
 
   @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   openedAt: Date;
+
+  @OneToMany(() => ReceiverEntity, (receiverEntity) => receiverEntity.tracking)
+  receivers: ReceiverEntity[];
 }
