@@ -35,9 +35,9 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            docker pull siuit/email-tracking-server:${{github.sha}}
-            docker ps -a
-            docker stop email-tracking-server || true
-            docker rm -f email-tracking-server || true
-            docker run -d -p 3001:3001 --restart unless-stopped --name email-tracking-server siuit/email-tracking-server:${{github.sha}}
-            docker image prune -f
+            sudo docker pull siuit/email-tracking-server:${{github.sha}}
+            sudo docker ps -a
+            sudo docker stop email-tracking-server || true
+            sudo docker rm -f email-tracking-server || true
+            sudo docker run -d -p 3001:3001 --restart unless-stopped --name email-tracking-server siuit/email-tracking-server:${{github.sha}}
+            sudo docker image prune -f
