@@ -76,7 +76,7 @@ export class TrackingService extends BaseService<TrackingEntity> {
     });
     if (email && !email.isRead) {
       email.isRead = true;
-      await this.receiverRepository.save(email);
+      await this.trackingRepository.save(email);
     }
   }
 
