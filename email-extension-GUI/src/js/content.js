@@ -10,7 +10,7 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
     composeView.on('presending', (event) => {
       const currentBody = composeView.getHTMLContent();
       trackingId = Date.now().toString();
-      const trackingPixel = `<img src="http://localhost:3001/api/tracking/track/${trackingId}.gif" width="1" height="1" style="display:none" />`;
+      const trackingPixel = `<img src="http://52.184.81.137:3001/api/tracking/track/${trackingId}.gif" width="1" height="1" style="display:none" />`;
       composeView.setBodyHTML(currentBody + trackingPixel);
 
       to = composeView.getToRecipients().map((recipient) => recipient.emailAddress);

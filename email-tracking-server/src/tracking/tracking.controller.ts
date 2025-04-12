@@ -17,12 +17,10 @@ export class TrackingController {
   async getSentEmailStatus(
     @Param('id') emailId: string,
     @Query('userId') userId: string,
-    @Query('receiver') receiver: string,
   ) {
     const isRead = await this.trackingService.getSentEmailStatus(
       emailId,
       userId,
-      receiver,
     );
     return { isRead };
   }

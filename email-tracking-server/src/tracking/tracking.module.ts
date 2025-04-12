@@ -5,11 +5,11 @@ import { GmailModule } from '@/gmail/gmail.module';
 import { CustomLoggerModule } from '@logger/logger.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TrackingEntity } from './entities/tracking.entity';
-import { ReceiverEntity } from './entities/receiver.entity';
+import { ReadedEntity } from './entities/readed.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([TrackingEntity, ReceiverEntity]),
+    TypeOrmModule.forFeature([TrackingEntity, ReadedEntity]),
     GmailModule,
     CustomLoggerModule,
   ],

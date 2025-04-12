@@ -8,15 +8,15 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { CreateTrackingDto } from './dto/create-tracking.dto';
-import { ReceiverEntity } from './entities/receiver.entity';
+import { ReadedEntity } from './entities/readed.entity';
 
 @Injectable()
 export class TrackingService extends BaseService<TrackingEntity> {
   constructor(
     @InjectRepository(TrackingEntity)
     private readonly trackingRepository: Repository<TrackingEntity>,
-    @InjectRepository(ReceiverEntity)
-    private readonly receiverRepository: Repository<ReceiverEntity>,
+    @InjectRepository(ReadedEntity)
+    private readonly readedRepository: Repository<ReadedEntity>,
     private readonly logger: CustomLoggerService,
     private readonly gmailService: GmailService,
   ) {
@@ -33,30 +33,15 @@ export class TrackingService extends BaseService<TrackingEntity> {
       isSent: true,
       userAddress: user.email,
     });
-    const data = await this.trackingRepository.save(tracking);
 
-    await Promise.all(
-      dto.receiverAddress.map(async (address) => {
-        const receiver = this.receiverRepository.create({
-          receiverAddress: address,
-          threadId: data.threadId,
-          isRead: false,
-        });
-        return await this.receiverRepository.save(receiver);
-      }),
-    );
+    await this.trackingRepository.save(tracking);
   }
 
-  async getSentEmailStatus(
-    emailId: string,
-    userId: string,
-    receiver: string,
-  ): Promise<boolean> {
-    const email = await this.receiverRepository.findOne({
+  async getSentEmailStatus(emailId: string, userId: string): Promise<any> {
+    const email = await this.trackingRepository.findOne({
       where: {
-        receiverAddress: receiver,
+        userId: userId,
         threadId: emailId,
-        tracking: { isSent: true, userId: userId },
       },
     });
     if (!email) {
@@ -64,7 +49,7 @@ export class TrackingService extends BaseService<TrackingEntity> {
         `Sent email with ID ${emailId} not found for user ${userId}`,
       );
     }
-    return email.isRead;
+    return email;
   }
 
   async trackEmailOpen(trackingId: string): Promise<void> {
@@ -74,9 +59,12 @@ export class TrackingService extends BaseService<TrackingEntity> {
         isSent: true,
       },
     });
-    if (email && !email.isRead) {
-      email.isRead = true;
-      await this.trackingRepository.save(email);
+    if (email) {
+      const readed = this.readedRepository.create({
+        trackingId: email.trackingId,
+        isRead: true,
+      });
+      await this.readedRepository.save(readed);
     }
   }
 
