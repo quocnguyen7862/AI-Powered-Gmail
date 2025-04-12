@@ -38,6 +38,13 @@ export class TrackingController {
       'base64',
     );
     res.set('Content-Type', 'image/gif');
+    res.set(
+      'Cache-Control',
+      'no-cache, no-store, must-revalidate,proxy-revalidate',
+    );
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    res.set('Surrogate-Control', 'no-store');
     res.status(200).send(pixel);
   }
 }
