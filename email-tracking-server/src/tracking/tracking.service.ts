@@ -1,52 +1,50 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CustomLoggerService } from '@logger/logger.service';
-import { GmailService } from '@/gmail/gmail.service';
+import { AuthService } from '@/auth/auth.service';
 import { BaseService } from '@/common/base/base.service';
 import { TrackingEntity } from './entities/tracking.entity';
 import { MessageName } from '@enums/message';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { CreateTrackingDto } from './dto/create-tracking.dto';
-import { ReadedEntity } from './entities/readed.entity';
+import { TrackingRepository } from './repositories/tracking.repository';
+import { ReadedRepository } from './repositories/readed.repository';
 
 @Injectable()
 export class TrackingService extends BaseService<TrackingEntity> {
   constructor(
-    @InjectRepository(TrackingEntity)
-    private readonly trackingRepository: Repository<TrackingEntity>,
-    @InjectRepository(ReadedEntity)
-    private readonly readedRepository: Repository<ReadedEntity>,
+    private readonly trackingRepository: TrackingRepository,
+    private readonly readedRepository: ReadedRepository,
     private readonly logger: CustomLoggerService,
-    private readonly gmailService: GmailService,
+    private readonly authService: AuthService,
   ) {
     super(MessageName.TRACKING, trackingRepository);
   }
 
   async saveSentEmail(dto: CreateTrackingDto): Promise<void> {
-    const user = await this.gmailService.getUserInfo();
+    const user = await this.authService.getUserInfo();
     const tracking = this.trackingRepository.create({
       messageId: dto.messageId,
       threadId: dto.threadId,
       trackingId: dto.trackingId,
       userId: user.id,
       isSent: true,
-      userAddress: user.email,
     });
 
     await this.trackingRepository.save(tracking);
   }
 
-  async getSentEmailStatus(emailId: string, userId: string): Promise<any> {
+  async getSentEmailStatus(threadId: string): Promise<any> {
+    const user = await this.authService.getUserInfo();
     const email = await this.trackingRepository.findOne({
       where: {
-        userId: userId,
-        threadId: emailId,
+        userId: user.id,
+        threadId: threadId,
       },
+      relations: ['readeds'],
     });
     if (!email) {
       throw new NotFoundException(
-        `Sent email with ID ${emailId} not found for user ${userId}`,
+        `Sent email with ID ${threadId} not found for user ${user.id}`,
       );
     }
     return email;

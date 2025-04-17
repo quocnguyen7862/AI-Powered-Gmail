@@ -4,23 +4,31 @@ import { serverConfig, URL_GMAIL_AUTH } from "./config";
 document.addEventListener('DOMContentLoaded', () => {
     const authButton = document.getElementById('authenticate');
     const authSection = document.getElementById('auth-section');
+    const trackerSection = document.getElementById('tracker-section');
 
-    // chrome.storage.local.get(['gmailTokens'], (result) => {
-    //     if (result.gmailTokens) {
-    //         authSection.classList.add('hidden');
-    //         trackingSection.classList.remove('hidden');
-    //         loadCurrentEmail();
-    //     }
-    // });
+    // Kiểm tra trạng thái đăng nhập khi mở popup
+    chrome.storage.local.get(['gmailTokens'], (result) => {
+        if (result.gmailTokens) {
+            authSection.classList.add('hidden');
+            trackerSection.classList.remove('hidden');
+        } else {
+            authSection.classList.remove('hidden');
+            trackerSection.classList.add('hidden');
+        }
+    });
 
-    // authButton.addEventListener('click', () => {
-    //     chrome.runtime.sendMessage({ action: 'authenticate' }, (response) => {
-    //         if (response.authUrl) {
-    //             chrome.tabs.create({ url: response.authUrl });
-    //         }
-    //     })
-    // });
-
+    // Lắng nghe thay đổi token để realtime chuyển UI (nếu cần)
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area === 'local' && changes.gmailTokens) {
+            if (changes.gmailTokens.newValue) {
+                authSection.classList.add('hidden');
+                trackerSection.classList.remove('hidden');
+            } else {
+                authSection.classList.remove('hidden');
+                trackerSection.classList.add('hidden');
+            }
+        }
+    });
 
     authButton.addEventListener("click", async () => {
         try {

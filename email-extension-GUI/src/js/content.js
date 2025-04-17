@@ -1,7 +1,8 @@
 import * as InboxSDK from '@inboxsdk/core';
 import axios from 'axios';
 import Api from './axios.config';
-import { URL_SAVE_SENT_EMAIL } from './config';
+import { URL_SAVE_SENT_EMAIL, URL_TRACKING_STATUS } from './config';
+import { ThreadStatus } from './enum';
 
 InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
   sdk.Compose.registerComposeViewHandler((composeView) => {
@@ -18,8 +19,8 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
 
     composeView.on('sent', async (event) => {
       try {
-        const messsageId = await composeView.getDraftID();
-        const threadId = composeView.getThreadID();
+        const messsageId = await event.getMessageID();
+        const threadId = await event.getThreadID();
 
         const response = await Api.postApiNonAuth(URL_SAVE_SENT_EMAIL, {
           messageId: messsageId,
@@ -97,4 +98,41 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
       }
     })
   })
+
+  sdk.Lists.registerThreadRowViewHandler(async (threadRowView) => {
+    const routeView = sdk.Router.getCurrentRouteView();
+    if (!routeView) return;
+    const routeType = routeView.getRouteID();
+    if (routeType !== sdk.Router.NativeListRouteIDs.SENT) return;
+
+    const messageId = await threadRowView.getThreadIDAsync();
+    let statusTest = ThreadStatus.NOT_TRACKED;
+    let textColor = "#a272f9";
+    let backgroundColor = "white";
+
+    try {
+      const response = await Api.getNotAuth(`${URL_TRACKING_STATUS}/${messageId}`);
+      const data = response.data;
+      const readeds = [...data.readeds];
+
+      if (readeds.length > 0) {
+        statusTest = ThreadStatus.OPENS + ": " + readeds.length;
+        textColor = "white";
+        backgroundColor = "#a272f9";
+      } else {
+        statusTest = ThreadStatus.UNOPENED;
+        textColor = "#a272f9";
+        backgroundColor = "white";
+      }
+    } catch (error) {
+      console.error("Error checking tracking status:", error);
+    } finally {
+      threadRowView.addLabel({
+        title: statusTest,
+        foregroundColor: textColor,
+        backgroundColor: backgroundColor,
+      })
+    }
+  })
+
 });

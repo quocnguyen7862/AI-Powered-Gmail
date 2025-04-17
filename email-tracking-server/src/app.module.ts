@@ -4,9 +4,9 @@ import { AppService } from './app.service';
 import { TrackingModule } from './tracking/tracking.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './common/database/database.module';
-import { GmailService } from './gmail/gmail.service';
-import { GmailModule } from './gmail/gmail.module';
+import { AuthService } from './auth/auth.service';
 import { SummarizeModule } from './summarize/summarize.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -16,10 +16,10 @@ import { SummarizeModule } from './summarize/summarize.module';
     }),
     TrackingModule,
     DatabaseModule,
-    GmailModule,
     SummarizeModule,
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService, GmailService],
+  providers: [AppService, AuthService],
 })
 export class AppModule {}

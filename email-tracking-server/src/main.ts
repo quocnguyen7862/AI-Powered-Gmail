@@ -13,6 +13,14 @@ async function bootstrap() {
     logger: new CustomLoggerService(),
   });
 
+  app.enableCors({
+    origin: [
+      'chrome-extension://nolapbheihcobdcjflnkjbkpkelelfcn',
+      'http://localhost:3000',
+    ],
+    credentials: true,
+  });
+
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.useGlobalFilters(new HttpExceptionFilter());

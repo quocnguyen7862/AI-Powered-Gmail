@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
 import { TrackingService } from './tracking.service';
 import { Response } from 'express';
 import { CreateTrackingDto } from './dto/create-tracking.dto';
@@ -13,16 +13,10 @@ export class TrackingController {
     return 'Email saved';
   }
 
-  @Get('sent/:id/status')
-  async getSentEmailStatus(
-    @Param('id') emailId: string,
-    @Query('userId') userId: string,
-  ) {
-    const isRead = await this.trackingService.getSentEmailStatus(
-      emailId,
-      userId,
-    );
-    return { isRead };
+  @Get('status/:threadId')
+  async getSentEmailStatus(@Param('threadId') threadId: string) {
+    const data = await this.trackingService.getSentEmailStatus(threadId);
+    return data;
   }
 
   @Get('/track/:trackingId')

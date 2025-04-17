@@ -1,13 +1,67 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Credentials, OAuth2Client } from 'google-auth-library';
 import { google } from 'googleapis';
+import { UserEntity } from './entities/user.entity';
+import { Repository } from 'typeorm';
+import { v4 as uuidv4 } from 'uuid';
+import { BaseService } from '@/common/base/base.service';
+import { MessageName } from '@enums/message';
 
 @Injectable()
-export class GmailService {
+export class AuthService extends BaseService<UserEntity> {
   constructor(
+    @InjectRepository(UserEntity)
+    private userRepo: Repository<UserEntity>,
     @Inject('OAUTH2_CLIENT')
     private readonly oauth2Client: OAuth2Client,
-  ) {}
+  ) {
+    super(MessageName.USER, userRepo);
+  }
+
+  async exchangeGoogleCodeForToken(code: string) {
+    const { tokens } = await this.oauth2Client.getToken(code);
+    this.oauth2Client.setCredentials(tokens);
+
+    const oauth2 = google.oauth2({ version: 'v2', auth: this.oauth2Client });
+    const { data: userInfo } = await oauth2.userinfo.get();
+
+    return {
+      access_token: tokens.access_token,
+      refresh_token: tokens.refresh_token,
+      user: userInfo,
+    };
+  }
+
+  async createSession(
+    user: any,
+    access_token: string,
+    refresh_token: string,
+  ): Promise<string> {
+    const sessionId = uuidv4(); // Generate a unique session ID
+
+    const userData = this.userRepo.create({
+      sessionId: sessionId,
+      userId: user.id,
+      email: user.email,
+      accessToken: access_token,
+      refreshToken: refresh_token,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Set expiration time to 1 hour from now
+    });
+
+    await this.userRepo.save(userData);
+    return sessionId;
+  }
+
+  async validateSession(sessionId: string): Promise<any> {
+    const session = await this.userRepo.findOne({ where: { sessionId } });
+
+    if (!session || session.expiresAt < new Date()) {
+      throw new UnauthorizedException('Session expired or not found');
+    }
+
+    return { userId: session.userId };
+  }
 
   async getAuthUrl(): Promise<string> {
     const scopes = [
