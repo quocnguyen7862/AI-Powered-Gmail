@@ -27,6 +27,7 @@ export class AuthService extends BaseService<UserEntity> {
     return {
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
+      refresh_token_expires_in: tokens['refresh_token_expires_in'],
       user: userInfo,
     };
   }
@@ -35,6 +36,7 @@ export class AuthService extends BaseService<UserEntity> {
     user: any,
     access_token: string,
     refresh_token: string,
+    refresh_token_expires_in: number,
   ): Promise<string> {
     const sessionId = uuidv4(); // Generate a unique session ID
 
@@ -44,10 +46,13 @@ export class AuthService extends BaseService<UserEntity> {
       email: user.email,
       accessToken: access_token,
       refreshToken: refresh_token,
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Set expiration time to 1 hour from now
+      expiresAt: new Date(Date.now() + refresh_token_expires_in), // Set expiration time based on refresh_token_expires_in
     });
 
-    await this.userRepo.save(userData);
+    await this.userRepo.upsert(userData, {
+      conflictPaths: ['userId', 'email'],
+      skipUpdateIfNoValuesChanged: true,
+    });
     return sessionId;
   }
 
@@ -70,6 +75,7 @@ export class AuthService extends BaseService<UserEntity> {
 
     const url = this.oauth2Client.generateAuthUrl({
       access_type: 'offline',
+      prompt: 'consent',
       scope: scopes,
     });
 

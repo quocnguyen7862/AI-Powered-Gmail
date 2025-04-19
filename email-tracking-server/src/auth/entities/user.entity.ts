@@ -1,25 +1,26 @@
 import { BaseEntity } from '@/common/base/base.entity';
 import { TrackingEntity } from '@/tracking/entities/tracking.entity';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, OneToMany, Unique } from 'typeorm';
 
 @Entity({ name: 'users' })
+@Unique(['userId', 'email'])
 export class UserEntity extends BaseEntity {
-  @Column({ unique: true })
+  @Column({ nullable: true })
   sessionId: string;
 
   @Column({ unique: true })
   userId: string;
 
-  @Column({ unique: true })
+  @Column()
   email: string;
 
   @Column()
   accessToken: string;
 
-  @Column()
+  @Column({ nullable: true })
   refreshToken: string;
 
-  @Column()
+  @Column({ nullable: true })
   expiresAt: Date;
 
   @OneToMany(() => TrackingEntity, (trackingEntity) => trackingEntity.user)

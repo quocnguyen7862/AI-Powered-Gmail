@@ -15,12 +15,13 @@ export class AuthController {
   @Get('google/callback')
   async googleAuthCallback(@Req() req: Request, @Res() res: Response) {
     const { code } = req.query;
-    const { access_token, refresh_token, user } =
+    const { access_token, refresh_token, refresh_token_expires_in, user } =
       await this.authService.exchangeGoogleCodeForToken(code as string);
     const sessionId = await this.authService.createSession(
       user,
       access_token,
       refresh_token,
+      refresh_token_expires_in,
     );
 
     res.cookie('sessionId', sessionId, {
