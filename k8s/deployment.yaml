@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-contaner
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api-contaner
+  template:
+    metadata:
+      labels:
+        app: api-contaner
+    spec:
+      containers:
+        - name: api-contaner
+          image: siuit/email-tracking-server:${{ github.sha }}
+          ports:
+            - containerPort: 3001
+          env:
+            - name: DB_HOST
+              value: "34.126.166.73"
+            - name: DB_PASS
+              value: "admin"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_USER
+              value: "postgres"
+            - name: DB_NAME
+              value: "tracking"
+            - name: GOOGLE_CLIENT_ID
+              value: "597706815393-gve6ojsboij98mpaov1hnp6omqertpn6.apps.googleusercontent.com"
+            - name: GOOGLE_CLIENT_SECRET
+              value: "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"
+            - name: GOOGLE_REDIRECT_URI
+              value: "http://34.126.123.226:3001/api/auth/google/callback"
