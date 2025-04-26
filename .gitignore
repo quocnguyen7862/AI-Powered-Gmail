@@ -1,3 +1,4 @@
 ﻿Azure_Cloud
 Google_Cloud
 email-extension-GUI.code-workspace
+.github/workflows/deploy-server-API.yml

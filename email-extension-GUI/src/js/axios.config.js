@@ -3,10 +3,13 @@ import { serverConfig } from './config';
 
 const API_URL = serverConfig.api
 
-const defaultOptions = {};
+const defaultOptions = {
+    baseURL: API_URL,
+    withCredentials: true
+};
 
 function getNotAuthApi(path, options = {}) {
-    return axios.get(`${API_URL}/${path.replace(/ ^\//, '')}`, {
+    return axios.get(`${path.replace(/ ^\//, '')}`, {
         ...defaultOptions,
         ...options,
         headers: {
@@ -16,45 +19,41 @@ function getNotAuthApi(path, options = {}) {
 }
 
 function getApi(path, options = {}, token) {
-    const bearerToken = token ? token : getTokenInClientSide();
-    return axios.get(`${API_URL}/${path.replace(/^\//, '')}`, {
+    return axios.get(`${path.replace(/^\//, '')}`, {
         ...defaultOptions,
         ...options,
         headers: {
             ...options.headers,
-            Authorization: `Bearer ${bearerToken}`
         }
     });
 }
 
 function getApiWithParams(path, params, options = {}, token) {
-    const bearerToken = token ? token : getTokenInClientSide();
 
-    return axios.get(`${API_URL}/${path.replace(/^\//, '')}`, {
+    return axios.get(`${path.replace(/^\//, '')}`, {
         ...defaultOptions,
         ...options,
         params: params,
         headers: {
             ...options.headers,
-            Authorization: `Bearer ${bearerToken}`
+
         }
     });
 }
 
 function postApi(path, data, options = {}, token) {
-    const bearerToken = token ? token : getTokenInClientSide();
-    return axios.post(`${API_URL}/${path.replace(/^\//, '')}`, data, {
+    return axios.post(`${path.replace(/^\//, '')}`, data, {
         ...defaultOptions,
         ...options,
         headers: {
             ...options.headers,
-            Authorization: `Bearer ${bearerToken}`
+
         }
     });
 }
 
 function postApiNonAuth(path, data, options = {}) {
-    return axios.post(`${API_URL}/${path.replace(/^\//, '')}`, data, {
+    return axios.post(`${path.replace(/^\//, '')}`, data, {
         ...defaultOptions,
         ...options,
         headers: {
@@ -64,74 +63,68 @@ function postApiNonAuth(path, data, options = {}) {
 }
 
 function putApiWithData(path, data, options = {}, token) {
-    const bearerToken = token ? token : getTokenInClientSide();
 
-    return axios.put(`${API_URL}/${path.replace(/^\//, '')}`, data, {
+    return axios.put(`${path.replace(/^\//, '')}`, data, {
         ...defaultOptions,
         ...options,
         headers: {
             ...options.headers,
-            Authorization: `Bearer ${bearerToken}`
+
         }
     });
 }
 
 function putApi(path, options = {}, token) {
-    const bearerToken = token ? token : getTokenInClientSide();
 
-    return axios.put(`${API_URL}/${path.replace(/^\//, '')}`, null, {
+    return axios.put(`${path.replace(/^\//, '')}`, null, {
         ...defaultOptions,
         ...options,
         headers: {
             ...options.headers,
-            Authorization: `Bearer ${bearerToken}`
+
         }
     });
 }
 
 function putApiWithParams(path, data, options = {}, token) {
-    const bearerToken = token ? token : getTokenInClientSide();
 
-    return axios.put(`${API_URL}/${path.replace(/^\//, '')}`, data, {
+    return axios.put(`${path.replace(/^\//, '')}`, data, {
         ...defaultOptions,
         ...options,
         headers: {
             ...options.headers,
-            Authorization: `Bearer ${bearerToken}`
+
         }
     });
 }
 
 function patchApi(path, data, options = {}, token) {
-    const bearerToken = token ? token : getTokenInClientSide();
 
-    return axios.patch(`${API_URL}/${path.replace(/^\//, '')}`, data, {
+    return axios.patch(`${path.replace(/^\//, '')}`, data, {
         ...defaultOptions,
         ...options,
         headers: {
             ...options.headers,
-            Authorization: `Bearer ${bearerToken}`
+
         }
     });
 }
 
 function deleteApi(path, options = {}, token) {
-    const bearerToken = token ? token : getTokenInClientSide();
 
-    return axios.delete(`${API_URL}/${path.replace(/^\//, '')}`, {
+    return axios.delete(`${path.replace(/^\//, '')}`, {
         ...defaultOptions,
         ...options,
         headers: {
             ...options.headers,
-            Authorization: `Bearer ${bearerToken}`
+
         }
     });
 }
 
 function deleteApiWithData(path, data, options = {}, token) {
-    const bearerToken = token ? token : getTokenInClientSide();
 
-    return axios.delete(`${API_URL}/${path.replace(/^\//, '')}`, {
+    return axios.delete(`${path.replace(/^\//, '')}`, {
         ...defaultOptions,
         ...options,
         data: {
@@ -139,15 +132,14 @@ function deleteApiWithData(path, data, options = {}, token) {
         },
         headers: {
             ...options.headers,
-            Authorization: `Bearer ${bearerToken}`
+
         }
     });
 }
 
 function deleteWithParams(path, data, options = {}, token) {
-    const bearerToken = token ? token : getTokenInClientSide();
 
-    return axios.delete(`${API_URL}/${path.replace(/^\//, '')}`, {
+    return axios.delete(`${path.replace(/^\//, '')}`, {
         ...defaultOptions,
         ...options,
         params: {
@@ -155,7 +147,7 @@ function deleteWithParams(path, data, options = {}, token) {
         },
         headers: {
             ...options.headers,
-            Authorization: `Bearer ${bearerToken}`
+
         }
     });
 }

@@ -8,6 +8,7 @@ module.exports = {
   entry: {
     content: './src/js/content.js',
     popup: './src/js/popup.js',
+    ReplyQuickPopup: './src/components/index.jsx',
     pageWorld: '@inboxsdk/core/pageWorld.js',
     background: '@inboxsdk/core/background.js'
   },
@@ -25,6 +26,11 @@ module.exports = {
           'style-loader',
           'css-loader'
         ]
+      },
+      {
+        test: /\.jsx?$/,
+        exclude: /node_modules/,
+        use: 'babel-loader',
       }
     ]
   },
@@ -33,12 +39,15 @@ module.exports = {
     filename: '[name].js',
     clean: true,
   },
+  resolve: {
+    extensions: ['.js', '.jsx'],
+  },
   plugins: [
     new CopyPlugin({
       patterns: [
         { from: "static" },
         { from: "src/popup.html" },
-        { from: "src/styles/popup.css" }
+        { from: "src/styles/popup.css" },
       ],
     }),
     new Dotenv()

@@ -1,5 +1,5 @@
 import { OAuth2Client } from 'google-auth-library';
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -11,6 +11,7 @@ import {
 } from '@environments';
 import { UserRepository } from './repositories/user.repository';
 
+@Global()
 @Module({
   imports: [TypeOrmModule.forFeature([UserEntity])],
   controllers: [AuthController],

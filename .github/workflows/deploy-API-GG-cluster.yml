@@ -1,0 +1,57 @@
+name: Deploy API to GG Cluster
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t siuit/email-tracking-server:${{github.sha}} -f email-tracking-server/Dockerfile email-tracking-server
+          docker push siuit/email-tracking-server:${{github.sha}}
+
+      - name: Set up Google Cloud SDK
+        run: |
+          curl -o google-cloud-sdk.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-372.0.0-linux-x86_64.tar.gz
+          tar -xf google-cloud-sdk.tar.gz
+          ./google-cloud-sdk/install.sh --quiet
+          echo "${{ secrets.GCLOUD_AUTH }}" > /tmp/gcloud.json
+          ./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=/tmp/gcloud.json
+          ./google-cloud-sdk/bin/gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Install kubectl plugin
+        run: |
+          ./google-cloud-sdk/bin/gcloud components install kubectl
+
+      - name: Set kubectl context
+        run: |
+          ./google-cloud-sdk/bin/gcloud container clusters get-credentials ${{ secrets.GCP_CLUSTER_NAME }} --zone ${{ secrets.GCP_CLUSTER_ZONE }} --project ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Configure kubectl
+        run: |
+          gcloud auth activate-service-account --key-file=/tmp/gcloud.json
+          kubectl config set-credentials gke-cluster-user --token=$(gcloud auth print-access-token)
+          kubectl config set-context gke-cluster --cluster=${{ secrets.GCP_CLUSTER_CONTEXT }} --user=gke-cluster-user
+          kubectl config use-context gke-cluster
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f deployment.yaml

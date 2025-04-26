@@ -6,21 +6,22 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HttpExceptionFilter } from '@exceptions/exception.filter';
 import { APP_PORT } from '@environments';
 import { CustomLoggerService } from '@logger/logger.service';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    cors: true,
     logger: new CustomLoggerService(),
   });
 
+  app.use(cookieParser());
   app.enableCors({
     origin: [
       'chrome-extension://nolapbheihcobdcjflnkjbkpkelelfcn',
       'http://localhost:3000',
+      'https://mail.google.com',
     ],
     credentials: true,
   });
-
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.useGlobalFilters(new HttpExceptionFilter());

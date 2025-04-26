@@ -28,11 +28,8 @@ export class AuthController {
       httpOnly: true,
       secure: false,
       sameSite: 'lax',
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      maxAge: refresh_token_expires_in,
     });
-    res.redirect(
-      'chrome-extension://nolapbheihcobdcjflnkjbkpkelelfcn/src/popup.html',
-    );
   }
 
   @Get('email-status')
