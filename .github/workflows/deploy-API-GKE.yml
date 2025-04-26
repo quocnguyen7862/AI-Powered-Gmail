@@ -25,7 +25,8 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t siuit/email-tracking-server:${{github.sha}} -f email-tracking-server/Dockerfile email-tracking-server
+          docker build -t siuit/email-tracking-server:latest -t siuit/email-tracking-server:${{ github.sha }} -f email-tracking-server/Dockerfile email-tracking-server
+          docker push siuit/email-tracking-server:latest
           docker push siuit/email-tracking-server:${{github.sha}}
 
       - name: Authenticate to Google Cloud
@@ -51,3 +52,4 @@ jobs:
         run: |
           kubectl apply -f k8s/deployment.yaml
           kubectl apply -f k8s/service.yaml
+          kubectl set image deployment/api-contaner api-contaner=siuit/email-tracking-server:latest

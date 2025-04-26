@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: api-contaner
-          image: siuit/email-tracking-server:${{ github.sha }}
+          image: siuit/email-tracking-server:latest
           ports:
             - containerPort: 3001
           env:
