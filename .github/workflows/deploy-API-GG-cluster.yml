@@ -28,29 +28,19 @@ jobs:
           docker build -t siuit/email-tracking-server:${{github.sha}} -f email-tracking-server/Dockerfile email-tracking-server
           docker push siuit/email-tracking-server:${{github.sha}}
 
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: "${{ secrets.GCLOUD_AUTH }}"
+
       - name: Set up Google Cloud SDK
-        run: |
-          curl -o google-cloud-sdk.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-372.0.0-linux-x86_64.tar.gz
-          tar -xf google-cloud-sdk.tar.gz
-          ./google-cloud-sdk/install.sh --quiet
-          echo "${{ secrets.GCLOUD_AUTH }}" > /tmp/gcloud.json
-          ./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=/tmp/gcloud.json
-          ./google-cloud-sdk/bin/gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      - name: Install kubectl plugin
+      - name: Get GKE credentials
         run: |
-          ./google-cloud-sdk/bin/gcloud components install kubectl
-
-      - name: Set kubectl context
-        run: |
-          ./google-cloud-sdk/bin/gcloud container clusters get-credentials ${{ secrets.GCP_CLUSTER_NAME }} --zone ${{ secrets.GCP_CLUSTER_ZONE }} --project ${{ secrets.GCP_PROJECT_ID }}
-
-      - name: Configure kubectl
-        run: |
-          gcloud auth activate-service-account --key-file=/tmp/gcloud.json
-          kubectl config set-credentials gke-cluster-user --token=$(gcloud auth print-access-token)
-          kubectl config set-context gke-cluster --cluster=${{ secrets.GCP_CLUSTER_CONTEXT }} --user=gke-cluster-user
-          kubectl config use-context gke-cluster
+          gcloud container clusters get-credentials ${{ secrets.GCP_CLUSTER_NAME }} --zone ${{ secrets.GCP_CLUSTER_ZONE }}
 
       - name: Deploy to Kubernetes
         run: |
