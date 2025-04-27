@@ -36,10 +36,3 @@ spec:
               value: "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"
             - name: GOOGLE_REDIRECT_URI
               value: "http://34.126.123.226:3001/api/auth/google/callback"
-          resources:
-            requests:
-              cpu: "250m"
-              memory: "512Mi"
-            limits:
-              cpu: "500m"
-              memory: "1Gi"
