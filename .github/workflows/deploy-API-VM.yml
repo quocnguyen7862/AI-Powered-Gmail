@@ -46,6 +46,9 @@ jobs:
           script: |
             sudo docker ps -a
 
+            sudo docker stop email-tracking-server || true
+            sudo docker rm -f email-tracking-server || true
+
             sudo docker pull siuit/email-tracking-server:latest
             sudo docker run -d -p 3001:3001 --restart unless-stopped --name email-tracking-server \
               -e "DB_HOST=${{secrets.DB_HOST}}" \
