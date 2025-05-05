@@ -1,29 +1,55 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, Button, Space } from "antd";
 import TextArea from "antd/es/input/TextArea";
+import Header from "./Header";
+import Messages from "./Messages";
+import Input from "./Input";
+import BotMessage from "./BotMessage";
+import UserMessage from "./UserMessage";
 
 export default function ReplyQuickPopup() {
-    const [value, setValue] = useState('');
+    const [messages, setMessages] = useState([]);
+
+    useEffect(() => {
+        async function loadWelcomeMessage() {
+            setMessages([
+                <BotMessage
+                    key="0"
+                    fetchMessage={async () => await API.GetChatbotResponse("hi")}
+                />
+            ]);
+        }
+        loadWelcomeMessage();
+    }, []);
+
+
+    const handleSend = async (text) => {
+        const newMessages = messages.concat(
+            <>
+                <UserMessage key={messages.length + 1} text={text} />
+                <BotMessage key={messages.length + 2} fetchMessage={async () => await API.GetChatbotResponse(text)} />
+            </>
+        );
+
+        setMessages(newMessages);
+    }
 
     return (
-        <Card
-            className="w-[380px] rounded-[8px] shadow-2xl border border-gray-200"
-            styles={{ body: { padding: 0, border: 0 } }}
-        >
-            <div className="mx-4 mt-2 mb-4">
-                <Space.Compact style={{ width: '100%' }} className="mt-3 rounded-lg text-sm" direction="vertical">
-                    <TextArea
-                        className="rounded-b-none"
-                        placeholder='Try "Write an ode to the em dash"'
-                        value={value}
-                        onChange={(e) => setValue(e.target.value)}
-                        autoSize={{ minRows: 1, maxRows: 12 }}
-                    />
-                    <Button>
-                        Submit
-                    </Button>
-                </Space.Compact>
-            </div>
-        </Card >
+        <div className="chatbot rounded-xl bg-[#f5f8fb] text-center flex flex-col w-[500px] overflow-hidden">
+            <Header />
+            <Messages messages={messages} />
+            <Input onSend={handleSend} />
+        </div>
     );
 }
+
+const API = {
+    GetChatbotResponse: async message => {
+        return new Promise(function (resolve, reject) {
+            setTimeout(function () {
+                if (message === "hi") resolve("Welcome to chatbot!");
+                else resolve("echo : " + message);
+            }, 2000);
+        });
+    }
+};

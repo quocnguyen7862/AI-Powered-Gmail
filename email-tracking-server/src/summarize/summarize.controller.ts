@@ -1,14 +1,14 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { SummarizeService } from './summarize.service';
 import { CreateSummarizeDto } from './dto/create-summarize.dto';
-import { ContentDto } from './dto/content.dto';
 import { ReplyGenerateDto } from './dto/reply-generate.dto';
+import { SummarizeDraftDto } from './dto/summarize-draft.dto';
 
 @Controller('summarize')
 export class SummarizeController {
   constructor(private readonly summarizeService: SummarizeService) {}
 
-  @Post()
+  @Post('by-message')
   async summarizeByMessageId(
     @Body() emailData: CreateSummarizeDto,
   ): Promise<string> {
@@ -16,9 +16,11 @@ export class SummarizeController {
     return result;
   }
 
-  @Post('content')
-  async summarizeByContent(@Body() emailData: ContentDto): Promise<string> {
-    const result = await this.summarizeService.summarizeByContent(emailData);
+  @Post('by-draft')
+  async summarizeByContent(
+    @Body() emailData: SummarizeDraftDto,
+  ): Promise<string> {
+    const result = await this.summarizeService.summarizeByDraftId(emailData);
     return result;
   }
 

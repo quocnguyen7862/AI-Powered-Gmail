@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class ContentDto {
+export class SummarizeDraftDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty()
@@ -10,5 +10,5 @@ export class ContentDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty()
-  content: string;
+  draftId: string;
 }

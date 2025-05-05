@@ -1,9 +1,9 @@
 import * as InboxSDK from '@inboxsdk/core';
 import Api from './axios.config';
-import { URL_SAVE_SENT_EMAIL, URL_SUMMARIZE, URL_TRACKING_STATUS } from './config';
+import { URL_SAVE_SENT_EMAIL, URL_SUMMARIZE_BY_DRAFT, URL_SUMMARIZE_BY_MESSAGE, URL_TRACKING_STATUS } from './config';
 import { ThreadStatus } from './enum';
 import { getSummaryModelHtml } from '../templates/summary-modal';
-import { createReplyQuickPopup } from '../components';
+import { createReplyQuickPopup, createSummaryPopup } from '../components';
 
 InboxSDK.load(1, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
   sdk.Compose.registerComposeViewHandler((composeView) => {
@@ -70,7 +70,7 @@ InboxSDK.load(1, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
         const messageView = threadView.getMessageViews();
         const messageId = await messageView[messageView.length - 1].getMessageIDAsync();
 
-        const response = await Api.post(URL_SUMMARIZE, { threadId: threadId, messageId: messageId })
+        const response = await Api.post(URL_SUMMARIZE_BY_MESSAGE, { threadId: threadId, messageId: messageId })
         const data = response.data;
 
         const templateHtml = getSummaryModelHtml({
@@ -115,6 +115,12 @@ InboxSDK.load(1, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
 
     const labels = messageView.getMessageLabels ? await messageView.getMessageLabels() : [];
     const isSent = labels.includes('SENT');
+
+    const bodyElement = messageView.getBodyElement();
+
+    if (bodyElement) {
+      createSummaryPopup({ el: bodyElement.insertAdjacentElement('beforebegin', document.createElement('div')), threadId: threadId, messageId: messageId });
+    }
 
     messageView.addToolbarButton({
       section: 'MORE',
@@ -216,6 +222,10 @@ InboxSDK.load(1, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
   })
 
   sdk.Compose.registerComposeViewHandler(async (composeView) => {
+    const isReply = composeView.isReply();
+    let threadId = null;
+    let draftId = null;
+
     function expandQuotedContentInCompose() {
       const composeEl = composeView.getElement();
       if (composeEl) {
@@ -226,18 +236,30 @@ InboxSDK.load(1, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
       }
     }
 
-    setTimeout(expandQuotedContentInCompose, 300);
+    const currentBody = composeView.getHTMLContent();
+    const pixel = `<img src="" width="1" height="1" style="display:none" />`;
+    composeView.setBodyHTML(currentBody + pixel);
 
-    const draftId = await composeView.getCurrentDraftID();
-    const threadId = composeView.getThreadID();
+    if (isReply) {
+      // expandQuotedContentInCompose();
+      draftId = await composeView.getDraftID();
+      threadId = composeView.getThreadID();
+    }
+
     const button = composeView.addButton({
       title: 'Reply Quickly',
+      iconUrl: 'https://img.icons8.com/material-outlined/48/sparkling.png',
+      iconClass: 'm-[-4px] w-[20px] h-[20px]',
       hasDropdown: true,
       onClick: async ({ dropdown }) => {
-        const content = composeView.getTextContent();
-        createReplyQuickPopup({ el: dropdown.el, inboxContent: content, threadId: threadId });
+        createReplyQuickPopup({ el: dropdown.el, threadId: threadId, draftId: draftId, composeView: composeView });
       }
     })
   })
+
+  // sdk.Toolbars.addToolbarButtonForApp({
+  //   title: 'AI Powered Gmail',
+  //   iconUrl: 'https://img.icons8.com/material-outlined/48/sparkling.png',
+  // })
 
 });
