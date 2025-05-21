@@ -51,6 +51,17 @@ const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
 const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || '';
 
+const REDIS_HOST = process.env.REDIS_HOST || '';
+const REDIS_PORT = process.env.REDIS_PORT;
+
+const MONGODB_URL = process.env.MONGODB_URL || '';
+const MONGODB_DB = process.env.MONGODB_DB || '';
+const MONGODB_USER = process.env.MONGODB_USER || '';
+const MONGODB_PASS = process.env.MONGODB_PASS || '';
+
+const MODEL_URL = process.env.MODEL_URL || '';
+const MODEL_GRPC_URL = process.env.MODEL_GRPC_URL || '';
+
 export {
   NODE_ENV,
   APP_PORT,
@@ -89,4 +100,12 @@ export {
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
   GOOGLE_REDIRECT_URI,
+  REDIS_HOST,
+  REDIS_PORT,
+  MONGODB_URL,
+  MONGODB_DB,
+  MONGODB_USER,
+  MONGODB_PASS,
+  MODEL_URL,
+  MODEL_GRPC_URL,
 };

@@ -1,4 +1,9 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Credentials, OAuth2Client } from 'google-auth-library';
 import { google } from 'googleapis';
 import { UserEntity } from './entities/user.entity';
@@ -6,18 +11,22 @@ import { v4 as uuidv4 } from 'uuid';
 import { BaseService } from '@/common/base/base.service';
 import { MessageName } from '@enums/message';
 import { UserRepository } from './repositories/user.repository';
+import { JwtService } from '@nestjs/jwt';
+import { JWT_ACCESS_SECRET } from '@environments';
+import { CreateSessionDto } from './dto/create-session.dto';
 
 @Injectable()
 export class AuthService extends BaseService<UserEntity> {
   constructor(
+    private readonly jwtService: JwtService,
     @Inject('OAUTH2_CLIENT')
     private readonly oauth2Client: OAuth2Client,
-    private userRepo: UserRepository,
+    private readonly userRepo: UserRepository,
   ) {
     super(MessageName.USER, userRepo);
   }
 
-  async exchangeGoogleCodeForToken(code: string) {
+  async exchangeGoogleCodeForToken(code: string): Promise<CreateSessionDto> {
     const { tokens } = await this.oauth2Client.getToken(code);
     this.oauth2Client.setCredentials(tokens);
 
@@ -25,28 +34,54 @@ export class AuthService extends BaseService<UserEntity> {
     const { data: userInfo } = await oauth2.userinfo.get();
 
     return {
-      access_token: tokens.access_token,
-      refresh_token: tokens.refresh_token,
-      refresh_token_expires_in: tokens['refresh_token_expires_in'],
-      user: userInfo,
+      accessToken: tokens.access_token,
+      expiryDate: tokens.expiry_date,
+      idToken: tokens.id_token,
+      refreshToken: tokens.refresh_token,
+      refreshTokenExpiresIn: tokens['refresh_token_expires_in'] || 0,
+      scope: tokens.scope,
+      tokenType: tokens.token_type,
+      userId: userInfo.id,
+      email: userInfo.email,
     };
   }
 
-  async createSession(
-    user: any,
-    access_token: string,
-    refresh_token: string,
-    refresh_token_expires_in: number,
-  ): Promise<string> {
+  async checkAuthenticated(email: string): Promise<any> {
+    try {
+      const user = await this.userRepo.findOne({
+        where: { email },
+      });
+
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+      const sesssion = await this.validateSession(user.sessionId);
+
+      const jwt_accessToken = await this.getJwtTokens(
+        sesssion.sessionId,
+        sesssion.email,
+      );
+
+      return { ...user, jwt_accessToken };
+    } catch (error) {
+      throw new UnauthorizedException(error);
+    }
+  }
+
+  async createSession(tokenInfo: CreateSessionDto): Promise<string> {
     const sessionId = uuidv4(); // Generate a unique session ID
 
     const userData = this.userRepo.create({
       sessionId: sessionId,
-      userId: user.id,
-      email: user.email,
-      accessToken: access_token,
-      refreshToken: refresh_token,
-      expiresAt: new Date(Date.now() + refresh_token_expires_in), // Set expiration time based on refresh_token_expires_in
+      userId: tokenInfo.userId,
+      email: tokenInfo.email,
+      accessToken: tokenInfo.accessToken,
+      expiresAt: new Date(tokenInfo.expiryDate),
+      idToken: tokenInfo.idToken,
+      refreshToken: tokenInfo.refreshToken,
+      refreshTokenExpiresIn: new Date(tokenInfo.refreshTokenExpiresIn),
+      scope: tokenInfo.scope,
+      tokenType: tokenInfo.tokenType,
     });
 
     await this.userRepo.upsert(userData, {
@@ -59,26 +94,42 @@ export class AuthService extends BaseService<UserEntity> {
   async validateSession(sessionId: string): Promise<any> {
     const session = await this.userRepo.findOne({ where: { sessionId } });
 
-    if (!session || session.expiresAt < new Date()) {
-      throw new UnauthorizedException('Session expired or not found');
+    if (!session || !session.accessToken) {
+      throw new UnauthorizedException('Invalid session');
     }
 
-    return { userId: session.userId };
+    this.oauth2Client.setCredentials({ access_token: session.accessToken });
+
+    try {
+      const oauth2 = google.oauth2({ version: 'v2', auth: this.oauth2Client });
+      const { data: userInfo } = await oauth2.userinfo.get();
+      return { ...userInfo, sessionId };
+    } catch (error) {
+      throw new UnauthorizedException(error);
+    }
   }
 
-  async getAuthUrl(): Promise<string> {
+  async getAuthUrl(email?: string): Promise<string> {
     const scopes = [
       'https://www.googleapis.com/auth/gmail.readonly',
       'https://www.googleapis.com/auth/gmail.modify',
       'https://www.googleapis.com/auth/userinfo.email',
+      'https://www.googleapis.com/auth/userinfo.profile',
     ];
 
-    const url = this.oauth2Client.generateAuthUrl({
-      access_type: 'offline',
-      prompt: 'consent',
-      scope: scopes,
-    });
+    const existEmail = await this.findByEmail(email);
 
+    const params: any = {
+      access_type: 'offline',
+      scope: scopes,
+      prompt: existEmail ? 'none' : 'consent', // Không hiện popup xác nhận lại nếu đã đăng nhập
+    };
+
+    if (email && existEmail) {
+      params.login_hint = email; // Gợi ý email để người dùng không phải nhập lại
+    }
+
+    const url = this.oauth2Client.generateAuthUrl(params);
     return url;
   }
 
@@ -153,5 +204,51 @@ export class AuthService extends BaseService<UserEntity> {
         removeLabelIds: ['UNREAD'],
       },
     });
+  }
+
+  async logout(sessionId: string): Promise<void> {
+    const user = await this.userRepo.findOne({ where: { sessionId } });
+
+    if (!user) {
+      throw new UnauthorizedException('Session not found');
+    }
+
+    user.accessToken = null;
+    user.refreshToken = null;
+    user.expiresAt = null;
+    user.sessionId = null;
+    await this.userRepo.save(user);
+  }
+
+  async getJwtTokens(sessionId: string, email: string) {
+    const accessToken = await this.jwtService.signAsync(
+      {
+        sessionId,
+        email,
+      },
+      {
+        secret: JWT_ACCESS_SECRET,
+      },
+    );
+    return accessToken;
+  }
+
+  async findBySessionId(id: string): Promise<UserEntity> {
+    const entity = await this.userRepo.findOneBy({
+      sessionId: id,
+      deletedAt: null,
+    });
+    if (!entity) {
+      throw new NotFoundException(MessageName.USER);
+    }
+    return entity;
+  }
+
+  async findByEmail(email: string): Promise<UserEntity> {
+    const entity = await this.userRepo.findOneBy({
+      email,
+      deletedAt: null,
+    });
+    return entity;
   }
 }

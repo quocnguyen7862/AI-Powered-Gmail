@@ -23,6 +23,8 @@ function getApi(path, options = {}, token) {
         ...defaultOptions,
         ...options,
         headers: {
+            Authorization: `Bearer ${token}`,
+
             ...options.headers,
         }
     });
@@ -35,8 +37,8 @@ function getApiWithParams(path, params, options = {}, token) {
         ...options,
         params: params,
         headers: {
+            Authorization: `Bearer ${token}`,
             ...options.headers,
-
         }
     });
 }
@@ -47,8 +49,8 @@ function postApi(path, data, options = {}, token) {
         ...options,
         headers: {
             ...options.headers,
-
-        }
+            Authorization: `Bearer ${token}`,
+        },
     });
 }
 
@@ -69,6 +71,7 @@ function putApiWithData(path, data, options = {}, token) {
         ...options,
         headers: {
             ...options.headers,
+            Authorization: `Bearer ${token}`,
 
         }
     });
@@ -81,6 +84,7 @@ function putApi(path, options = {}, token) {
         ...options,
         headers: {
             ...options.headers,
+            Authorization: `Bearer ${token}`,
 
         }
     });
@@ -93,6 +97,7 @@ function putApiWithParams(path, data, options = {}, token) {
         ...options,
         headers: {
             ...options.headers,
+            Authorization: `Bearer ${token}`,
 
         }
     });
@@ -105,6 +110,7 @@ function patchApi(path, data, options = {}, token) {
         ...options,
         headers: {
             ...options.headers,
+            Authorization: `Bearer ${token}`,
 
         }
     });
@@ -117,6 +123,7 @@ function deleteApi(path, options = {}, token) {
         ...options,
         headers: {
             ...options.headers,
+            Authorization: `Bearer ${token}`,
 
         }
     });
@@ -132,6 +139,7 @@ function deleteApiWithData(path, data, options = {}, token) {
         },
         headers: {
             ...options.headers,
+            Authorization: `Bearer ${token}`,
 
         }
     });
@@ -147,6 +155,7 @@ function deleteWithParams(path, data, options = {}, token) {
         },
         headers: {
             ...options.headers,
+            Authorization: `Bearer ${token}`,
 
         }
     });

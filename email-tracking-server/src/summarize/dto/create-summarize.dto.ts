@@ -1,14 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
-
 export class CreateSummarizeDto {
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty()
-  threadId: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty()
+  from?: object;
   messageId: string;
+  subject: string;
+  summary: string;
 }

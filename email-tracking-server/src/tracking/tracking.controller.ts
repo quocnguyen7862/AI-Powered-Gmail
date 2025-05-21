@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
 import { TrackingService } from './tracking.service';
 import { Response } from 'express';
 import { CreateTrackingDto } from './dto/create-tracking.dto';
+import { Auth } from '@/common/decorators/auth.decorator';
+import { User } from '@/common/decorators/user.decorator';
 
 @Controller('tracking')
 export class TrackingController {
@@ -40,5 +42,19 @@ export class TrackingController {
     res.set('Expires', '0');
     res.set('Surrogate-Control', 'no-store');
     res.status(200).send(pixel);
+  }
+
+  @Get('stats')
+  @Auth()
+  async getStats(
+    @User() user: any,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ) {
+    return await this.trackingService.getTrackingStats(
+      user.sessionId,
+      new Date(startDate),
+      new Date(endDate),
+    );
   }
 }

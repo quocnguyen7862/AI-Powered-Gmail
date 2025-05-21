@@ -7,6 +7,7 @@ import { DatabaseModule } from './common/database/database.module';
 import { AuthService } from './auth/auth.service';
 import { SummarizeModule } from './summarize/summarize.module';
 import { AuthModule } from './auth/auth.module';
+import { ModelModule } from './model/model.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AuthModule } from './auth/auth.module';
     DatabaseModule,
     SummarizeModule,
     AuthModule,
+    ModelModule,
   ],
   controllers: [AppController],
   providers: [AppService, AuthService],

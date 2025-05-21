@@ -1,4 +1,4 @@
-from pydantic import BaseModel
-
-class EmailRequest(BaseModel):
-    email_content: str
+from .model_request import ModelRequest
+class EmailRequest(ModelRequest):
+    email_data: str
+    attachments: list = []

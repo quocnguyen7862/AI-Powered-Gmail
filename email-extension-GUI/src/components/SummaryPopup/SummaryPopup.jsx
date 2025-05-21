@@ -3,11 +3,11 @@ import React, { useEffect } from 'react'
 import { URL_SUMMARIZE_BY_MESSAGE } from '../../js/config';
 import Api from '../../js/axios.config';
 
-const SummaryPopup = ({ threadId, messageId }) => {
+const SummaryPopup = ({ threadId, messageId, session }) => {
     const [summary, setSummary] = React.useState('')
 
     const fetchSummary = async () => {
-        const response = await Api.post(URL_SUMMARIZE_BY_MESSAGE, { threadId: threadId, messageId: messageId })
+        const response = await Api.post(URL_SUMMARIZE_BY_MESSAGE, { threadId: threadId, messageId: messageId }, {}, session?.accessToken);
         const data = response.data;
         return data;
     };
@@ -34,7 +34,7 @@ const SummaryPopup = ({ threadId, messageId }) => {
                         height={20}
                         src="https://img.icons8.com/sf-regular/48/overview-pages-2.png"
                         alt="Custom Icon"
-                        title="Click to summarize email"
+                        title="Summarize email"
                     />
                 </button>
             </Popover>

@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { CreateTrackingDto } from './dto/create-tracking.dto';
 import { TrackingRepository } from './repositories/tracking.repository';
 import { ReadedRepository } from './repositories/readed.repository';
+import { Between } from 'typeorm';
 
 @Injectable()
 export class TrackingService extends BaseService<TrackingEntity> {
@@ -68,5 +69,27 @@ export class TrackingService extends BaseService<TrackingEntity> {
 
   private hashUserAddress(userAddress: string): string {
     return bcrypt.hashSync(userAddress, 10);
+  }
+
+  async getTrackingStats(sessionId: string, start: Date, end: Date) {
+    const user = await this.authService.findBySessionId(sessionId);
+
+    const sentCount = await this.trackingRepository.count({
+      where: {
+        userId: user.userId,
+        isSent: true,
+        createdAt: Between(start, end),
+      },
+    });
+
+    const openedCount = await this.readedRepository
+      .createQueryBuilder('readed')
+      .leftJoinAndSelect('readed.tracking', 'tracking')
+      .where('tracking.userId = :userId', { userId: user.userId })
+      .andWhere('readed.isRead = :isRead', { isRead: true })
+      .andWhere('readed.createdAt BETWEEN :start AND :end', { start, end })
+      .getCount();
+
+    return { sentCount, openedCount };
   }
 }

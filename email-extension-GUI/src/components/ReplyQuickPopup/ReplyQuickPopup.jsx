@@ -1,107 +1,280 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Card, Button, Space, Typography, Divider, message } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import Api from "../../js/axios.config";
-import { URL_SUMMARIZE_BY_DRAFT, URL_SUMMARIZE_GENERATE, URL_SUMMARIZE_SCENARIO } from "../../js/config";
+import { URL_SUMMARIZE_BY_DRAFT, URL_REPLY_GENERATE, URL_REPLY_SCENARIO, URL_CHAT_HISTORY } from "../../js/config";
 
 const { Title, Text } = Typography;
 
-export default function ReplyQuickPopup({ threadId, draftId, composeView }) {
+export default function ReplyQuickPopup({ threadId, draftId, composeView, session }) {
     const [value, setValue] = useState('');
     const [summary, setSummary] = useState('');
     const [scenarios, setScenarios] = useState([]);
     const [reply, setReply] = useState('');
+    const [messageId, setMessageId] = useState(null);
+    const [messages, setMessages] = useState([]);
+    const [nextPage, setNextPage] = useState(null);
 
     const fetchSummary = async () => {
-        const response = await Api.post(URL_SUMMARIZE_BY_DRAFT, { threadId: threadId, draftId: draftId })
+        const response = await Api.post(URL_SUMMARIZE_BY_DRAFT, { threadId: threadId, draftId: draftId }, {}, session?.accessToken)
         const data = response.data;
-        return data;
+        setMessageId(data.messageId);
+        return data.summary;
     };
 
     const fetchScenarios = async (messageId) => {
-        const response = await Api.getWithParams(URL_SUMMARIZE_SCENARIO, { messageId: messageId })
+        const response = await Api.getWithParams(URL_REPLY_SCENARIO, { messageId: messageId }, {}, session?.accessToken)
         const data = response.data;
         return data;
     };
 
-    const handleScenarioClick = async (scenario) => {
-        const response = await Api.post(URL_SUMMARIZE_GENERATE, { messageId: scenario.messageId, title: scenario.title, description: scenario.description })
+    const fetchChatHistory = async (page) => {
+        const response = await Api.getWithParams(URL_CHAT_HISTORY + `/${draftId}`, { page: page }, {}, session?.accessToken)
         const data = response.data;
-        return data;
+        setNextPage(data.nextPage);
+        return data.data;
+    }
+
+    const loadMoreMessages = async () => {
+        if (!nextPage) return;
+        const data = await fetchChatHistory(nextPage);
+
+        const historyMessages = []
+        for (let i = 0; i < data.length - 1; i = i + 2) {
+            const humanMessage = data[i].message;
+            const aiMessage = data[i + 1].message;
+
+            const newMessages = messages.concat(
+                <div key={messages.length + i + 1}>
+                    {(messages.length > 0) && <Divider className="!m-0" />}
+                    <UserMessage text={humanMessage} />
+                    <BotMessage preMesssage={aiMessage} composeView={composeView} canInsert={true} />
+                </div>
+            )
+            historyMessages.push(newMessages);
+        }
+        setMessages(prev => [...prev, ...historyMessages]);
     }
 
     useEffect(() => {
-        fetchSummary().then((data) => {
-            setSummary(data.summary);
-            fetchScenarios(data.messageId).then((data) => {
-                setScenarios([...data.output.map((item) => ({ ...item, messageId: data.messageId }))]);
-            })
-        })
+        async function loadSummary() {
+            setMessages([
+                <BotMessage key={0} fetchMessage={fetchSummary} />
+            ])
+        }
+
+        async function loadChatHistory() {
+            const data = await fetchChatHistory(1);
+            const historyMessages = []
+            for (let i = 0; i < data.length - 1; i = i + 2) {
+                const humanMessage = data[i].message;
+                const aiMessage = data[i + 1].message;
+
+                const newMessages = messages.concat(
+                    <div key={messages.length + i + 1}>
+                        {(messages.length > 0) && <Divider className="!m-0" />}
+                        <UserMessage text={humanMessage} />
+                        <BotMessage preMesssage={aiMessage} composeView={composeView} canInsert={true} />
+                    </div>
+                )
+                historyMessages.push(newMessages);
+            }
+            setMessages(prev => [...prev, ...historyMessages]);
+        }
+
+        if (!!draftId) {
+            if (!!threadId) {
+                loadSummary();
+            }
+            loadChatHistory();
+        }
     }, [threadId, draftId]);
 
-    console.log("🚀 ~ ReplyQuickPopup ~ onClickInsertReply:", composeView)
-    return (
-        <Card
-            className="!w-[380px] !rounded-none !my-3"
-            styles={{ body: { padding: 0, border: 0 } }}
-        >
-            {
-                (summary && summary.length > 0) ?
-                    <div>
-                        <Title level={5} className="!mb-2">Sender's intent</Title>
-                        <Text className="!text-gray-700">{summary}</Text>
-                    </div> : null
-            }
-            {
-                (reply && reply.length > 0) ?
-                    <div>
-                        <Divider className="!my-4" />
-                        <div>
-                            <Title level={5} className="!mb-2">Your reply</Title>
-                            <Text className="!text-gray-700">{reply}</Text>
-                            <Button onClick={() => {
-                                composeView.insertHTMLIntoBodyAtCursor(reply)
-                            }}>Insert</Button>
-                        </div>
-                    </div> : null
-            }
-            {
-                (summary && summary.length > 0) ?
-                    <div>
-                        <Divider className="!my-4" />
-                        <div>
-                            <Title level={5} className="!mb-2">How do you want to reply?</Title>
-                            <Text className="!text-gray-500">Here are some ideas</Text>
-                            <div className="!mt-3">
-                                {
-                                    scenarios.map((scenario, index) => {
-                                        console.log("🚀 ~ scenarios.map ~ scenario:", scenario)
-                                        return (
-                                            <Button key={index} onClick={() => { handleScenarioClick(scenario).then(value => setReply(value.text)) }} className="!mr-2 !mb-2" type="default">
-                                                {scenario.icon} {scenario.title}
-                                            </Button>
-                                        )
-                                    })
-                                }
-                            </div>
-                        </div>
-                        <Divider className="!my-4" />
-                    </div> : null
-            }
-            <div>
-                <Space.Compact style={{ width: '100%' }} className="!mt-3 !rounded-lg !text-sm" direction="vertical">
-                    <TextArea
-                        className="!rounded-b-none"
-                        placeholder='Try "Write an ode to the em dash"'
-                        value={value}
-                        onChange={(e) => setValue(e.target.value)}
-                        autoSize={{ minRows: 1, maxRows: 12 }}
-                    />
-                    <Button>
-                        Submit
-                    </Button>
-                </Space.Compact>
+    useEffect(() => {
+        if (!!messageId) {
+            fetchScenarios(messageId).then((data) => {
+                setScenarios([...data.output.map((item) => ({ ...item, messageId: data.messageId }))]);
+            })
+        }
+    }, [messageId])
+
+    const handleScenarioClick = async (scenario) => {
+        const newMessages = messages.concat(
+            <dev key={messages.length + 1}>
+                <Divider className="!m-0" />
+                <UserMessage text={scenario.description} />
+                <BotMessage fetchMessage={async () => {
+                    const response = await Api.post(URL_REPLY_GENERATE, { draftId: draftId, messageId: scenario.messageId, title: scenario.title, description: scenario.description }, {}, session?.accessToken)
+                    const data = response.data;
+                    return data.output;
+                }} canInsert={true} composeView={composeView} />
+            </dev>
+        )
+
+        setMessages(newMessages);
+    }
+
+    const handleSend = async (text) => {
+        const newMessages = messages.concat(
+            <div key={messages.length + 1}>
+                {(messages.length > 0) && <Divider className="!m-0" />}
+                <UserMessage text={text} />
+                <BotMessage fetchMessage={async () => {
+                    const response = await Api.post(URL_REPLY_GENERATE, { draftId: draftId, title: text, description: text }, {}, session?.accessToken)
+                    const data = response.data;
+                    return data.output;
+                }} canInsert={true} composeView={composeView} />
             </div>
-        </Card >
+        )
+
+        setMessages(newMessages);
+    }
+
+    return (
+        <div className="chatbot rounded-[3px] bg-white text-center flex flex-col w-[400px] h-[500px] overflow-hidden">
+            <Header />
+            <Messages messages={messages} loadMoreMessages={loadMoreMessages} />
+            <Input onSend={handleSend} scenarios={scenarios} handleScenarioClick={handleScenarioClick} />
+        </div>
     );
+}
+
+export const Header = () => {
+    return (
+        <div className="header p-1 text-center max-h-[58px] text-base font-bold bg-[#005b9c] text-white">&nbsp;Reply Quickly</div>
+    )
+}
+
+export const Messages = ({ messages, loadMoreMessages }) => {
+    const el = useRef(null);
+
+    const handleScroll = async (e) => {
+        const { scrollTop, clientHeight, scrollHeight } = e.target;
+        if (scrollTop === 0) {
+            await loadMoreMessages();
+        }
+    }
+
+    useEffect(() => {
+        el.current.scrollIntoView({ block: "end", behavior: "smooth" })
+    }, [messages]);
+
+    return (
+        <div className='messages w-full h-dvh overflow-auto flex flex-col p-[10px_0]' onScroll={handleScroll}>
+            {messages}
+            <div id="el" ref={el} />
+        </div>
+    )
+}
+
+export const Input = ({ onSend, scenarios, handleScenarioClick }) => {
+    const [text, setText] = React.useState('');
+
+    const handleInputChange = (e) => {
+        setText(e.target.value);
+    }
+
+    const handleSend = (e) => {
+        e.preventDefault();
+        onSend(text);
+        setText("");
+    }
+
+    return (
+        <div className='input relative bg-[#f5f5f5]'>
+            {scenarios?.length > 0 && (
+                <ul className='divide-y divide-slate-200'>
+                    {scenarios.map((scenario, index) => (
+                        <li key={index} className='first:pt-0 last:pb-0 flex flex-col'>
+                            <button className='text-left p-[8px_16px] hover:bg-[#ebebeb]' onClick={() => { handleScenarioClick(scenario) }}>{scenario.title}</button>
+                        </li>
+                    ))}
+                </ul>
+            )}
+            <div className='relative m-[8px_16px_16px_16px]'>
+                <form onSubmit={handleSend}>
+                    <input
+                        className='text-base border-0 rounded-md shadow-[0px_1px_4px_0.5px_#7f7f7f4d] border-t-[1px_solid_#eee] opacity-[1] outline-[none] p-[16px_52px_16px_10px] w-full focus:outline-none'
+                        type='text'
+                        onChange={handleInputChange}
+                        value={text}
+                        placeholder='Type your message...'
+                    />
+                    <button type='submit' className='bg-transparent border-0 rounded-br-xl shadow-none cursor-pointer fill-[#4a4a4a] opacity-[1] outline-none p-[14px_16px_12px_16px] absolute right-0 top-0'>
+                        <svg
+                            version="1.1"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 500 500"
+                        >
+                            <g>
+                                <g>
+                                    <polygon points="0,497.25 535.5,267.75 0,38.25 0,216.75 382.5,267.75 0,318.75" />
+                                </g>
+                            </g>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+    )
+}
+
+export const BotMessage = ({ fetchMessage, canInsert, isSummary, composeView, preMesssage }) => {
+    const [isLoading, setLoading] = useState(false);
+    const [message, setMessage] = useState("");
+
+    useEffect(() => {
+        async function loadMessage() {
+            setLoading(true);
+            const msg = await fetchMessage();
+            setMessage(msg);
+            setLoading(false);
+        }
+
+        if (fetchMessage) {
+            loadMessage();
+        } else {
+            setMessage(preMesssage);
+        }
+    }, [fetchMessage]);
+
+    const handleInsert = () => {
+        composeView.insertHTMLIntoBodyAtCursor(message)
+    }
+
+    return (
+        <div className='message-container w-full relative' >
+            <div className='bot-message flex flex-col gap-2 w-[97%] p-4 m-[5px] text-justify'>
+                {isLoading ? "..." : (
+                    <>
+                        <p>{message}</p>
+                        {canInsert && (
+                            <div className='items-center flex gap-2 justify-between'>
+                                <div className='items-center flex gap-2'>
+                                    <button onClick={handleInsert} className='px-2 leading-8 items-center border-none rounded box-border bg-[#005b9c] hover:bg-[#003d69] text-white inline-flex font-bold justify-center outline-none'>Insert</button>
+                                </div>
+                                <div className='items-center flex gap-2'>
+                                    <button className='px-2 min-h-8 items-center border-none rounded box-border bg-transparent hover:bg-[#ebebeb] hover:shadow-[inset_0_0_0_1px_#a8a8a8] text-white inline-flex font-normal align-middle justify-center outline-none'>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" fill="none" viewBox="0 0 16 16" aria-hidden="true" data-icon="InterfaceCopy" stroke="transparent">
+                                            <path stroke="#646B81" strokeLinecap="round" strokeLinejoin="round" d="M7.053 10.842v1.908c0 .69.56 1.25 1.25 1.25h4.447c.69 0 1.25-.56 1.25-1.25V8.303c0-.69-.56-1.25-1.25-1.25h-1.908M8.947 3.25v4.447c0 .69-.56 1.25-1.25 1.25H3.25c-.69 0-1.25-.56-1.25-1.25V3.25C2 2.56 2.56 2 3.25 2h4.447c.69 0 1.25.56 1.25 1.25"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
+        </div>
+    )
+}
+
+export const UserMessage = ({ text }) => {
+    return (
+        <div className="message-container w-full">
+            <div className="user-message text-justify float-right p-[15px_10px] m-3 rounded-[20px_20px_1px_20px] bg-[#cccccc] text-black">{text}</div>
+        </div>
+    )
 }

@@ -1,11 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class ReplyGenerateDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty()
-  messageId: string;
+  draftId: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  messageId?: string;
 
   @IsString()
   @IsNotEmpty()

@@ -10,10 +10,12 @@ import {
   GOOGLE_REDIRECT_URI,
 } from '@environments';
 import { UserRepository } from './repositories/user.repository';
+import { AccessTokenStrategy } from './strategies/accessToken.strategy';
+import { JwtModule } from '@nestjs/jwt';
 
 @Global()
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity])],
+  imports: [JwtModule.register({}), TypeOrmModule.forFeature([UserEntity])],
   controllers: [AuthController],
   providers: [
     AuthService,
@@ -28,7 +30,8 @@ import { UserRepository } from './repositories/user.repository';
         });
       },
     },
+    AccessTokenStrategy,
   ],
-  exports: [AuthService, UserRepository, 'OAUTH2_CLIENT'],
+  exports: [AuthService, UserRepository, 'OAUTH2_CLIENT', JwtModule],
 })
 export class AuthModule {}

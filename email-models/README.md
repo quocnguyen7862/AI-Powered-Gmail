@@ -18,6 +18,12 @@ $ 3. pip install -r requirements.txt
 $ 4. fastapi dev main.py
 ```
 
+# Debug
+
+````bash
+$ $env:PYTHONPATH = (Get-Location).Path
+$ run debug
+
 ```bash
 $ start command on deploy: gunicorn -k uvicorn.workers.UvicornWorker app.main:app
-```
+````

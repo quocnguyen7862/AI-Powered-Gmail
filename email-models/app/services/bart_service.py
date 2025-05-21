@@ -69,7 +69,7 @@ class BartSummarizationService:
             raise Exception(f"Error summarizing text: {str(e)}")
         
 if __name__ == "__main__":
-    # Test code
+    # Test code 
     service = BartSummarizationService()
     text = """Dear candidates,
 
