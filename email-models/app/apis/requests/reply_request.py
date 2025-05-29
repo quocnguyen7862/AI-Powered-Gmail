@@ -5,3 +5,4 @@ class ReplyRequest(ModelRequest):
     draft_id: str
     summary : Optional[str] = None
     message: str
+    attachments: Optional[list] = []

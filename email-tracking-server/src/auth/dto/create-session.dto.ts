@@ -3,6 +3,11 @@ import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateSessionDto {
   @IsString()
+  @IsOptional()
+  @ApiProperty()
+  fullName?: string;
+
+  @IsString()
   @ApiProperty()
   accessToken: string;
 

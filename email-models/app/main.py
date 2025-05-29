@@ -10,6 +10,7 @@ from app.apis.reply_router import reply_router
 from app.apis.chatbot_router import chatbot_router
 from app.apis.search_router import search_router
 from app.apis.model_router import model_router
+from app.apis.label_router import label_router
 from app.core.config import settings
 
 logging.config.fileConfig(settings.LOGGING_CONFIG_FILE, disable_existing_loggers=False)
@@ -33,6 +34,7 @@ def get_application() -> FastAPI:
     application.include_router(chatbot_router, prefix=settings.API_PREFIX)
     application.include_router(search_router, prefix=settings.API_PREFIX)
     application.include_router(model_router, prefix=settings.API_PREFIX)
+    application.include_router(label_router,prefix=settings.API_PREFIX)
 
     return application
 

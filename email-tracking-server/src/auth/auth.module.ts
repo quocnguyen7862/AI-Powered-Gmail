@@ -12,10 +12,15 @@ import {
 import { UserRepository } from './repositories/user.repository';
 import { AccessTokenStrategy } from './strategies/accessToken.strategy';
 import { JwtModule } from '@nestjs/jwt';
+import { LabelModule } from '@/label/label.module';
 
 @Global()
 @Module({
-  imports: [JwtModule.register({}), TypeOrmModule.forFeature([UserEntity])],
+  imports: [
+    JwtModule.register({}),
+    TypeOrmModule.forFeature([UserEntity]),
+    LabelModule,
+  ],
   controllers: [AuthController],
   providers: [
     AuthService,

@@ -8,6 +8,5 @@ class ChatbotRequest(ModelRequest):
     token_type: str
     id_token: str
     scope: str
-    user_id: str
     client_id: str
     client_secret: str

@@ -7,6 +7,9 @@ import { CheckModelDto } from './dto/check-model.dto';
 import axios from 'axios';
 import { MODEL_URL } from '@environments';
 import { CreateModelDto } from './dto/create-model.dto';
+import { UpdateAuthDto } from '@/auth/dto/update-auth.dto';
+import { NotFoundException } from '@exceptions/not-found.exception';
+import { RemoveResult } from '@/common/types/remove-result';
 
 @Injectable()
 export class ModelService extends BaseService<ModelEntity> {
@@ -33,11 +36,14 @@ export class ModelService extends BaseService<ModelEntity> {
 
       return reponse.data;
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        { message: error.response.data.detail },
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
-  async createModel(
+  async createMyModel(
     createDto: CreateModelDto,
     userId: string,
   ): Promise<ModelEntity> {
@@ -52,6 +58,60 @@ export class ModelService extends BaseService<ModelEntity> {
     return await this.modelRepo.save(entity);
   }
 
+  async updateMyModel(
+    id: number,
+    updateDto: UpdateAuthDto,
+    userId: string,
+  ): Promise<ModelEntity> {
+    const toUpdate = await this.modelRepo.findOne({
+      where: { id, userId, deletedAt: null },
+    });
+    if (!toUpdate) {
+      throw new NotFoundException(MessageName.MODEL);
+    }
+    const updated = Object.assign(toUpdate, updateDto);
+    return this.modelRepo.save(updated);
+  }
+
+  async removeMyModel(id: number, userId: any): Promise<RemoveResult> {
+    const toRemove = await this.modelRepo.findOne({
+      where: { id, userId, deletedAt: null },
+    });
+
+    if (!toRemove) {
+      throw new NotFoundException(MessageName.MODEL);
+    }
+
+    const removed = await this.modelRepo.delete(toRemove.id);
+    return {
+      removed: removed.affected,
+    };
+  }
+
+  async activeMyModel(
+    id: number,
+    userId: any,
+    isActive: boolean,
+  ): Promise<ModelEntity> {
+    await this.modelRepo
+      .createQueryBuilder()
+      .update()
+      .set({ isSelected: false })
+      .where('userId = :userId', { userId })
+      .andWhere('isSelected = :isSelected', { isSelected: true })
+      .andWhere('deletedAt IS NULL')
+      .execute();
+
+    const toUpdate = await this.modelRepo.findOne({
+      where: { id, userId, deletedAt: null },
+    });
+    if (!toUpdate) {
+      throw new NotFoundException(MessageName.MODEL);
+    }
+    const updated = Object.assign(toUpdate, { isSelected: isActive });
+    return await this.modelRepo.save(updated);
+  }
+
   async getSelectedByUserId(userId: string): Promise<ModelEntity> {
     const entity = await this.modelRepo.findOne({
       where: {
@@ -60,8 +120,25 @@ export class ModelService extends BaseService<ModelEntity> {
       },
     });
     if (!entity) {
-      throw new HttpException('Model not found', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        { message: 'No model has been registered' },
+        HttpStatus.NOT_FOUND,
+      );
     }
     return entity;
+  }
+
+  async findByUserId(userId: string): Promise<ModelEntity[]> {
+    const models = await this.modelRepo.find({
+      where: {
+        userId: userId,
+        deletedAt: null,
+      },
+      order: {
+        createdAt: 'ASC',
+      },
+    });
+
+    return models;
   }
 }

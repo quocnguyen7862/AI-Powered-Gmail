@@ -3,6 +3,7 @@ import { Card, Button, Space, Typography, Divider, message } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import Api from "../../js/axios.config";
 import { URL_SUMMARIZE_BY_DRAFT, URL_REPLY_GENERATE, URL_REPLY_SCENARIO, URL_CHAT_HISTORY } from "../../js/config";
+import { Remarkable } from "remarkable";
 
 const { Title, Text } = Typography;
 
@@ -16,16 +17,26 @@ export default function ReplyQuickPopup({ threadId, draftId, composeView, sessio
     const [nextPage, setNextPage] = useState(null);
 
     const fetchSummary = async () => {
-        const response = await Api.post(URL_SUMMARIZE_BY_DRAFT, { threadId: threadId, draftId: draftId }, {}, session?.accessToken)
-        const data = response.data;
-        setMessageId(data.messageId);
-        return data.summary;
+        try {
+            const response = await Api.post(URL_SUMMARIZE_BY_DRAFT, { threadId: threadId, draftId: draftId }, {}, session?.accessToken)
+            const data = response.data;
+            setMessageId(data.messageId);
+            return data.summary;
+        }
+        catch (error) {
+            throw new Error(error.data.message);
+        }
     };
 
     const fetchScenarios = async (messageId) => {
-        const response = await Api.getWithParams(URL_REPLY_SCENARIO, { messageId: messageId }, {}, session?.accessToken)
-        const data = response.data;
-        return data;
+        try {
+
+            const response = await Api.getWithParams(URL_REPLY_SCENARIO, { messageId: messageId }, {}, session?.accessToken)
+            const data = response.data;
+            return data;
+        } catch (error) {
+            return error.data
+        }
     };
 
     const fetchChatHistory = async (page) => {
@@ -104,9 +115,13 @@ export default function ReplyQuickPopup({ threadId, draftId, composeView, sessio
                 <Divider className="!m-0" />
                 <UserMessage text={scenario.description} />
                 <BotMessage fetchMessage={async () => {
-                    const response = await Api.post(URL_REPLY_GENERATE, { draftId: draftId, messageId: scenario.messageId, title: scenario.title, description: scenario.description }, {}, session?.accessToken)
-                    const data = response.data;
-                    return data.output;
+                    try {
+                        const response = await Api.post(URL_REPLY_GENERATE, { draftId: draftId, messageId: scenario.messageId, title: scenario.title, description: scenario.description }, {}, session?.accessToken)
+                        const data = response.data;
+                        return data.output;
+                    } catch (error) {
+                        throw new Error(error.data.message);
+                    }
                 }} canInsert={true} composeView={composeView} />
             </dev>
         )
@@ -120,9 +135,13 @@ export default function ReplyQuickPopup({ threadId, draftId, composeView, sessio
                 {(messages.length > 0) && <Divider className="!m-0" />}
                 <UserMessage text={text} />
                 <BotMessage fetchMessage={async () => {
-                    const response = await Api.post(URL_REPLY_GENERATE, { draftId: draftId, title: text, description: text }, {}, session?.accessToken)
-                    const data = response.data;
-                    return data.output;
+                    try {
+                        const response = await Api.post(URL_REPLY_GENERATE, { draftId: draftId, title: text, description: text }, {}, session?.accessToken)
+                        const data = response.data;
+                        return data.output;
+                    } catch (error) {
+                        throw new Error(error.data.message);
+                    }
                 }} canInsert={true} composeView={composeView} />
             </div>
         )
@@ -200,7 +219,7 @@ export const Input = ({ onSend, scenarios, handleScenarioClick }) => {
                         value={text}
                         placeholder='Type your message...'
                     />
-                    <button type='submit' className='bg-transparent border-0 rounded-br-xl shadow-none cursor-pointer fill-[#4a4a4a] opacity-[1] outline-none p-[14px_16px_12px_16px] absolute right-0 top-0'>
+                    <button type='submit' disabled={text == ""} className='bg-transparent border-0 rounded-br-xl shadow-none cursor-pointer fill-[#4a4a4a] opacity-[1] outline-none p-[14px_16px_12px_16px] absolute right-0 top-0'>
                         <svg
                             version="1.1"
                             xmlns="http://www.w3.org/2000/svg"
@@ -224,12 +243,18 @@ export const Input = ({ onSend, scenarios, handleScenarioClick }) => {
 export const BotMessage = ({ fetchMessage, canInsert, isSummary, composeView, preMesssage }) => {
     const [isLoading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
+    const [isError, setIsError] = useState(false);
 
     useEffect(() => {
         async function loadMessage() {
             setLoading(true);
-            const msg = await fetchMessage();
-            setMessage(msg);
+            try {
+                const msg = await fetchMessage();
+                setMessage(msg);
+            } catch (error) {
+                setMessage(error.message)
+                setIsError(true);
+            }
             setLoading(false);
         }
 
@@ -241,7 +266,14 @@ export const BotMessage = ({ fetchMessage, canInsert, isSummary, composeView, pr
     }, [fetchMessage]);
 
     const handleInsert = () => {
-        composeView.insertHTMLIntoBodyAtCursor(message)
+        const markup = renderMarkdownToHTML(message);
+        composeView.insertHTMLIntoBodyAtCursor(markup?.__html)
+    }
+
+    const writeToClipboard = async () => {
+        try {
+            await navigator.clipboard.writeText(message);
+        } catch (error) { }
     }
 
     return (
@@ -249,14 +281,14 @@ export const BotMessage = ({ fetchMessage, canInsert, isSummary, composeView, pr
             <div className='bot-message flex flex-col gap-2 w-[97%] p-4 m-[5px] text-justify'>
                 {isLoading ? "..." : (
                     <>
-                        <p>{message}</p>
-                        {canInsert && (
+                        <MarkdownPreview markdown={message} />
+                        {(canInsert && !isError) && (
                             <div className='items-center flex gap-2 justify-between'>
                                 <div className='items-center flex gap-2'>
                                     <button onClick={handleInsert} className='px-2 leading-8 items-center border-none rounded box-border bg-[#005b9c] hover:bg-[#003d69] text-white inline-flex font-bold justify-center outline-none'>Insert</button>
                                 </div>
                                 <div className='items-center flex gap-2'>
-                                    <button className='px-2 min-h-8 items-center border-none rounded box-border bg-transparent hover:bg-[#ebebeb] hover:shadow-[inset_0_0_0_1px_#a8a8a8] text-white inline-flex font-normal align-middle justify-center outline-none'>
+                                    <button onClick={writeToClipboard} className='px-2 min-h-8 items-center border-none rounded box-border bg-transparent hover:bg-[#ebebeb] hover:shadow-[inset_0_0_0_1px_#a8a8a8] text-white inline-flex font-normal align-middle justify-center outline-none'>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" fill="none" viewBox="0 0 16 16" aria-hidden="true" data-icon="InterfaceCopy" stroke="transparent">
                                             <path stroke="#646B81" strokeLinecap="round" strokeLinejoin="round" d="M7.053 10.842v1.908c0 .69.56 1.25 1.25 1.25h4.447c.69 0 1.25-.56 1.25-1.25V8.303c0-.69-.56-1.25-1.25-1.25h-1.908M8.947 3.25v4.447c0 .69-.56 1.25-1.25 1.25H3.25c-.69 0-1.25-.56-1.25-1.25V3.25C2 2.56 2.56 2 3.25 2h4.447c.69 0 1.25.56 1.25 1.25"></path>
                                         </svg>
@@ -277,4 +309,15 @@ export const UserMessage = ({ text }) => {
             <div className="user-message text-justify float-right p-[15px_10px] m-3 rounded-[20px_20px_1px_20px] bg-[#cccccc] text-black">{text}</div>
         </div>
     )
+}
+
+const renderMarkdownToHTML = (markdown) => {
+    const md = new Remarkable();
+    const renderedHTML = md.render(markdown);
+    return { __html: renderedHTML };
+}
+
+export const MarkdownPreview = ({ markdown }) => {
+    const markup = renderMarkdownToHTML(markdown);
+    return <div dangerouslySetInnerHTML={markup} />;
 }

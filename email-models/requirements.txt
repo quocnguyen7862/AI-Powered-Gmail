@@ -36,3 +36,4 @@ google-auth
 google-auth-oauthlib
 grpcio 
 grpcio-tools
+langchain-qdrant

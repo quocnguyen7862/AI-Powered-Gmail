@@ -1,4 +1,5 @@
 import { BaseEntity } from '@/common/base/base.entity';
+import { LabelEntity } from '@/label/entities/label.entity';
 import { ModelEntity } from '@/model/entities/model.entity';
 import { TrackingEntity } from '@/tracking/entities/tracking.entity';
 import { Column, Entity, OneToMany, Unique } from 'typeorm';
@@ -6,6 +7,9 @@ import { Column, Entity, OneToMany, Unique } from 'typeorm';
 @Entity({ name: 'users' })
 @Unique(['userId', 'email'])
 export class UserEntity extends BaseEntity {
+  @Column({ nullable: true })
+  fullName: string;
+
   @Column({ nullable: true })
   sessionId: string;
 
@@ -41,4 +45,7 @@ export class UserEntity extends BaseEntity {
 
   @OneToMany(() => ModelEntity, (modelEntity) => modelEntity.user)
   models: ModelEntity[];
+
+  @OneToMany(() => LabelEntity, (label) => label.user)
+  labels: LabelEntity[];
 }

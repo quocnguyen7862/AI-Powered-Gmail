@@ -33,4 +33,5 @@ export enum MessageName {
   TRACKING = 'tracking',
   SUMMARY = 'summary',
   MODEL = 'model',
+  LABEL = 'label',
 }

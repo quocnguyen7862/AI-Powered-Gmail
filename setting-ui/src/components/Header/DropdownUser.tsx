@@ -18,16 +18,16 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            {session?.user.name}
+            {session?.user?.name}
           </span>
-          <span className="block text-xs">{session?.user.email}</span>
+          <span className="block text-xs">{session?.user?.email}</span>
         </span>
 
         <span className="h-12 w-12 rounded-full">
           <Image
             width={112}
             height={112}
-            src={session?.user.image as string}
+            src={session?.user?.image as string}
             style={{
               width: "auto",
               height: "auto",
@@ -59,7 +59,7 @@ const DropdownUser = () => {
         <div
           className={`absolute right-0 mt-4 flex w-62.5 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark`}
         >
-          <ul className="flex flex-col gap-5 border-b border-stroke px-6 py-7.5 dark:border-strokedark">
+          {/* <ul className="flex flex-col gap-5 border-b border-stroke px-6 py-7.5 dark:border-strokedark">
             <li>
               <Link
                 href="/profile"
@@ -131,7 +131,7 @@ const DropdownUser = () => {
                 Account Settings
               </Link>
             </li>
-          </ul>
+          </ul> */}
           <button
             onClick={() => signOut({ callbackUrl: "/auth/signin" })}
             className="flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"

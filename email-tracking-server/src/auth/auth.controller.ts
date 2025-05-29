@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import { Auth } from '@/common/decorators/auth.decorator';
 import { User } from '@/common/decorators/user.decorator';
 import { CreateSessionDto } from './dto/create-session.dto';
+import { AccessTokenDto } from './dto/access-token.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -73,5 +74,10 @@ export class AuthController {
   @Auth()
   async logout(@User() user): Promise<any> {
     return this.authService.logout(user.sessionId);
+  }
+
+  @Post('set-credential')
+  setCredential(@Body() payload: AccessTokenDto) {
+    return this.authService.setCredentials(payload.accessToken);
   }
 }

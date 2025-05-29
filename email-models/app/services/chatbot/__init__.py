@@ -8,6 +8,15 @@ from langchain_community.tools.gmail.utils import build_resource_service
 from langchain_community.tools.gmail.create_draft import GmailCreateDraft
 from langchain_community.tools.gmail.get_message import GmailGetMessage
 from langchain_community.tools.gmail.get_thread import GmailGetThread
+from langchain_community.tools.gmail.search import GmailSearch
+from services.chatbot.summarize_conversation_agent import SummarizeConversationAgent
+from langgraph.store.redis import RedisStore
+from langgraph.store.base import BaseStore
+from langgraph.checkpoint.redis import RedisSaver
+from helpers.redis_memory import store_memory_tool, retrieve_memories_tool,redis_client
+
+redis_saver = RedisSaver(redis_client=redis_client)
+redis_saver.setup()
 
 def create_agent_graph(gmail_creds,model_name: str = 'gpt-4o-mini', api_key_type='OPENAI_API_KEY', api_key: str = '') -> StateGraph:
     # Gmail API credentials
@@ -17,23 +26,28 @@ def create_agent_graph(gmail_creds,model_name: str = 'gpt-4o-mini', api_key_type
         GmailCreateDraft(api_resource=api_resource),
         GmailGetMessage(api_resource=api_resource),
         GmailGetThread(api_resource=api_resource),
+        GmailSearch(api_resource=api_resource),
+        store_memory_tool,
+        retrieve_memories_tool
     ]
 
     # Initialize agents
     os.environ[api_key_type] = api_key
     llm = init_chat_model(model_name)
-    gmail_chatbot = GamilToolAgent(llm,tools)
+    gmail_chatbot = GamilToolAgent(llm,tools,redis_saver)
+    summarize_conversation = SummarizeConversationAgent(llm)
 
-    # Create summarizer workflow
     workflow = StateGraph(ChatbotState)
 
     # Add agent nodes
     workflow.add_node("GmailChatbot", gmail_chatbot)
+    workflow.add_node("SummarizeConversation", summarize_conversation)
 
     # Define edges
-    workflow.add_edge("GmailChatbot", END)
+    workflow.add_edge("GmailChatbot", "SummarizeConversation")
+    workflow.add_edge("SummarizeConversation", END)
 
     # Set entry point
     workflow.set_entry_point("GmailChatbot")
 
-    return workflow.compile()
+    return workflow.compile(checkpointer=redis_saver)

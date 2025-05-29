@@ -3,9 +3,10 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
+  Put,
+  Patch,
 } from '@nestjs/common';
 import { ModelService } from './model.service';
 import { CreateModelDto } from './dto/create-model.dto';
@@ -15,18 +16,20 @@ import { Auth } from '@/common/decorators/auth.decorator';
 import { User } from '@/common/decorators/user.decorator';
 
 @Controller('model')
+@Auth()
 export class ModelController {
   constructor(private readonly modelService: ModelService) {}
 
   @Post()
   @Auth()
   create(@Body() createModelDto: CreateModelDto, @User() user: any) {
-    return this.modelService.createModel(createModelDto, user.id);
+    return this.modelService.createMyModel(createModelDto, user.id);
   }
 
   @Get()
-  findAll() {
-    return this.modelService.findAll();
+  @Auth()
+  findAll(@User() user: any) {
+    return this.modelService.findByUserId(user.id);
   }
 
   @Get(':id')
@@ -34,14 +37,33 @@ export class ModelController {
     return this.modelService.findById(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateModelDto: UpdateModelDto) {
-    return this.modelService.update(+id, updateModelDto);
+  @Put(':id')
+  @Auth()
+  update(
+    @Param('id') id: string,
+    @Body() updateModelDto: UpdateModelDto,
+    @User() user: any,
+  ) {
+    return this.modelService.updateMyModel(+id, updateModelDto, user.id);
+  }
+
+  @Patch('active/:id')
+  @Auth()
+  async activeModel(
+    @Param('id') id: string,
+    @User() user: any,
+    @Body() payload: { isActive: boolean },
+  ) {
+    return await this.modelService.activeMyModel(
+      +id,
+      user.id,
+      payload.isActive,
+    );
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.modelService.remove(+id);
+  remove(@Param('id') id: string, @User() user: any) {
+    return this.modelService.removeMyModel(+id, user.id);
   }
 
   @Post('check')

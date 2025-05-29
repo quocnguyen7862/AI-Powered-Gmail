@@ -6,18 +6,20 @@ import dayjs from "dayjs";
 
 const DATE_FORMAT = 'YYYY/MM/DD';
 
-export default function AppMenuPopup({ email, session, fullName }) {
+export default function AppMenuPopup({ email, session }) {
     const [isEnabled, setIsEnabled] = useState(session?.isSignedIn);
     const [isLoading, setIsLoading] = useState(false);
     const [startDate, setStartDate] = useState(dayjs().startOf('week').format(DATE_FORMAT));
     const [endDate, setEndDate] = useState(dayjs().endOf('week').format(DATE_FORMAT));
-    const [trackingStats, setTrackingStats] = useState({ sentCount: 0, openedCount: 0, repliedCount: 0 });
+    const [trackingStats, setTrackingStats] = useState({ sentCount: 0, openedCount: 0, unopenedCount: 0 });
 
     const handleLogin = async () => {
         try {
             const response = await Api.postApiNonAuth(URL_GMAIL_AUTH, { email: email });
-            // window.location.href = response.data;
-            window.open(response.data, '_blank');
+            if (response.data.isRegistered)
+                window.location.href = response.data.url;
+            else
+                window.open(response.data.url, '_blank');
         } catch (error) {
             console.log("🚀 ~ handleLogin ~ error:", error)
         }
@@ -67,9 +69,15 @@ export default function AppMenuPopup({ email, session, fullName }) {
     return (
         <div className="w-[350px] bg-white rounded-[3px] shadow-lg p-5 font-sans absolute -translate-x-1/2">
             <div className="flex items-center justify-between mb-6">
-                <a href="#" target="_blank">
+                <a href="http://localhost:3000" target="_blank">
                     <span className="text-xs text-gray-400">AI Powered Gmail</span>
                 </a>
+                {
+                    isEnabled && (
+                        <span className="text-sm text-gray-700">{session.fullName}</span>
+                    )
+                }
+
             </div>
             {
                 !isEnabled && (
@@ -122,10 +130,10 @@ export default function AppMenuPopup({ email, session, fullName }) {
                                 </div>
                             </div>
                             <div>
-                                <div className="text-sm text-gray-400">REPLIED</div>
+                                <div className="text-sm text-gray-400">UNOPENED</div>
                                 <div className="flex flex-row gap-1 justify-center items-end">
-                                    <span className="text-2xl font-bold text-yellow-500 ">{trackingStats.repliedCount || 0}</span>
-                                    <span className="text-sm text-gray-400">{trackingStats.sentCount !== 0 ? (trackingStats.repliedCount / trackingStats.sentCount).toFixed(2) : 0}%</span>
+                                    <span className="text-2xl font-bold text-yellow-500 ">{trackingStats.unopenedCount || 0}</span>
+                                    <span className="text-sm text-gray-400">{trackingStats.sentCount !== 0 ? (trackingStats.unopenedCount / trackingStats.sentCount).toFixed(2) : 0}%</span>
                                 </div>
                             </div>
                         </div>

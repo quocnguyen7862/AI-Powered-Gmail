@@ -32,7 +32,7 @@ class SummarizeAttachmentsAgent:
         self.llm=llm
         self.llm_chain = prompt | self.llm
 
-    def __call__(self, state:EmailState) ->dict:
+    def __call__(self, state) ->dict:
         try:
             summaries = []
 
@@ -60,8 +60,6 @@ class SummarizeAttachmentsAgent:
                     print(f"Error removing file {file_location}: {str(e)}")
             
             state['attachment_summaries']=summaries
-            state['current_agent']="SummarizeAttachments"
-            state['next_agent']="MergeAllAndSummarize"
             return state
         except Exception as e:
             raise e

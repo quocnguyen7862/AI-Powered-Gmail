@@ -14,6 +14,8 @@ import { UserRepository } from './repositories/user.repository';
 import { JwtService } from '@nestjs/jwt';
 import { JWT_ACCESS_SECRET } from '@environments';
 import { CreateSessionDto } from './dto/create-session.dto';
+import { LabelService } from '@/label/label.service';
+import { DEFAULT_LABELS } from '@/common/types/default-labels';
 
 @Injectable()
 export class AuthService extends BaseService<UserEntity> {
@@ -22,6 +24,7 @@ export class AuthService extends BaseService<UserEntity> {
     @Inject('OAUTH2_CLIENT')
     private readonly oauth2Client: OAuth2Client,
     private readonly userRepo: UserRepository,
+    private readonly labelService: LabelService,
   ) {
     super(MessageName.USER, userRepo);
   }
@@ -34,6 +37,7 @@ export class AuthService extends BaseService<UserEntity> {
     const { data: userInfo } = await oauth2.userinfo.get();
 
     return {
+      fullName: null,
       accessToken: tokens.access_token,
       expiryDate: tokens.expiry_date,
       idToken: tokens.id_token,
@@ -71,7 +75,10 @@ export class AuthService extends BaseService<UserEntity> {
   async createSession(tokenInfo: CreateSessionDto): Promise<string> {
     const sessionId = uuidv4(); // Generate a unique session ID
 
+    const existEmail = await this.findByEmail(tokenInfo.email);
+
     const userData = this.userRepo.create({
+      fullName: tokenInfo.fullName,
       sessionId: sessionId,
       userId: tokenInfo.userId,
       email: tokenInfo.email,
@@ -88,6 +95,22 @@ export class AuthService extends BaseService<UserEntity> {
       conflictPaths: ['userId', 'email'],
       skipUpdateIfNoValuesChanged: true,
     });
+
+    // if (!existEmail) {
+    //   await Promise.all(
+    //     DEFAULT_LABELS.map(async (label) => {
+    //       return await this.labelService.createMyLabel(
+    //         {
+    //           name: label.name,
+    //           description: label.description,
+    //           color: label.color,
+    //         },
+    //         tokenInfo.userId,
+    //       );
+    //     }),
+    //   );
+    // }
+
     return sessionId;
   }
 
@@ -109,7 +132,7 @@ export class AuthService extends BaseService<UserEntity> {
     }
   }
 
-  async getAuthUrl(email?: string): Promise<string> {
+  async getAuthUrl(email?: string): Promise<any> {
     const scopes = [
       'https://www.googleapis.com/auth/gmail.readonly',
       'https://www.googleapis.com/auth/gmail.modify',
@@ -118,6 +141,13 @@ export class AuthService extends BaseService<UserEntity> {
     ];
 
     const existEmail = await this.findByEmail(email);
+
+    if (!existEmail) {
+      return {
+        url: 'http://localhost:3000',
+        isRegistered: false,
+      };
+    }
 
     const params: any = {
       access_type: 'offline',
@@ -130,7 +160,10 @@ export class AuthService extends BaseService<UserEntity> {
     }
 
     const url = this.oauth2Client.generateAuthUrl(params);
-    return url;
+    return {
+      url,
+      isRegistered: true,
+    };
   }
 
   async getUserInfo(): Promise<{ id: string; email: string }> {
@@ -150,8 +183,13 @@ export class AuthService extends BaseService<UserEntity> {
     return tokens;
   }
 
-  setCredentials(tokens: Credentials): void {
-    this.oauth2Client.setCredentials(tokens);
+  setCredentials(accessToken: string): void {
+    try {
+      this.oauth2Client.setCredentials({ access_token: accessToken });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      throw new UnauthorizedException('Invalid access token');
+    }
   }
 
   async getEmailStatus(userId: string, emailId: string): Promise<boolean> {

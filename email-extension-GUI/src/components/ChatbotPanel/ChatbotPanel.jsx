@@ -13,9 +13,13 @@ const ChatbotPanel = ({ session }) => {
                 {(messages.length > 0) && <Divider className="!m-0" />}
                 <UserMessage text={text} />
                 <BotMessage fetchMessage={async () => {
-                    const response = await Api.post(URL_CHATBOT, { message: text }, {}, session?.accessToken)
-                    const data = response.data;
-                    return data.output;
+                    try {
+                        const response = await Api.post(URL_CHATBOT, { message: text }, {}, session?.accessToken)
+                        const data = response.data;
+                        return data.output;
+                    } catch (error) {
+                        throw new Error(error.data.message);
+                    }
                 }} canInsert={false} />
             </div>
         )

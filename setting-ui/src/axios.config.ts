@@ -70,10 +70,16 @@ function putApi(path: string, data: any, options: any = {}) {
   });
 }
 
-function putApiWithParams(path: string, data: any, options: any = {}) {
+function putApiWithParams(
+  path: string,
+  params: object,
+  data: any,
+  options: any = {},
+) {
   return axios.put(`${API_URL}/${path.replace(/^\//, "")}`, data, {
     ...defaultOptions,
     ...options,
+    params: params,
     headers: {
       ...options.headers,
     },

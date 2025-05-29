@@ -19,15 +19,19 @@ const handler = NextAuth({
       authorization: {
         params: {
           scope: scopes.join(" "),
+          access_type: "offline",
+          prompt: "consent",
         },
       },
     }),
   ],
   callbacks: {
     async signIn(data) {
+      console.log("🚀 ~ signIn ~ data:", data);
       try {
         const { user, account, profile } = data;
         await Api.post(AUTH_SESSION, {
+          fullName: user.name,
           userId: user.id,
           email: user.email,
           accessToken: account?.access_token,
@@ -46,11 +50,20 @@ const handler = NextAuth({
       }
     },
     async session({ session, token }) {
-      session.accessToken = token.accessToken as any;
-      session.expires = token.expiresAt as any;
-      session.user.image = token.picture;
-      session.user.name = token.name;
-      session.user.email = token.email;
+      try {
+        const res = await Api.getWithParams(AUTH_CHECK, {
+          email: token.email,
+        });
+        if (res.status == 200) {
+          session.accessToken = res.data.jwt_accessToken;
+        }
+        session.expires = token.expiresAt as any;
+      } catch (e: any) {
+        session.user = undefined;
+        session.accessToken = undefined;
+        session.expires = undefined as any;
+      }
+      console.log("🚀 ~ session:", session);
       return session;
     },
     async jwt({ token, user, account }) {
@@ -59,12 +72,6 @@ const handler = NextAuth({
       }
 
       if (user) {
-        const res = await Api.getWithParams(AUTH_CHECK, {
-          email: user.email,
-        });
-        if (res.status == 200) {
-          token.accessToken = res.data.jwt_accessToken;
-        }
         token.name = user.name;
         token.email = user.email;
         token.picture = user.image;

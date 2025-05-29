@@ -4,8 +4,10 @@ from services.chatbot import create_agent_graph
 from app.helpers.chatbot_state import ChatbotState
 from langchain_core.messages.human import HumanMessage
 from langchain_community.tools.gmail.utils import get_gmail_credentials
+from langchain_core.runnables import RunnableConfig
 import os
 import json
+import pprint
 
 chatbot_router = APIRouter(prefix="/chatbot", tags=["chatbot"])
 static_location = os.path.join(os.getcwd(), "app/static/credentials.json")
@@ -48,7 +50,11 @@ async def chatbot(request: ChatbotRequest):
             api_key=request.api_key
         )
 
-        result = chatbot_workflow.invoke(state)
+        config = RunnableConfig(configurable={"thread_id":"fksldjflsklsjflks","user_id":request.user_id})
+
+        result = chatbot_workflow.stream(state,config=config,stream_mode="values")
+        for chunk in result:
+            print(pprint.pp(chunk))
         reply = result['messages'][-1]
         response = {
             "output": getattr(reply, "content", None),

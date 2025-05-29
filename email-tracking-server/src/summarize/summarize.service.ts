@@ -53,6 +53,7 @@ export class SummarizeService {
     emailData: EmailMessageDto,
     user: any,
   ): Promise<any> {
+    await this.modelService.getSelectedByUserId(user.id);
     const cached_summary = await this.getSummarizeById(emailData.messageId);
     if (cached_summary) {
       return cached_summary;
@@ -126,6 +127,7 @@ export class SummarizeService {
     emailData: SummarizeDraftDto,
     user: any,
   ): Promise<any> {
+    await this.modelService.getSelectedByUserId(user.id);
     const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
     const draft = await gmail.users.drafts.get({
       userId: 'me',
@@ -178,10 +180,9 @@ export class SummarizeService {
   }
 
   async replyScenario(messageId: string, user: any): Promise<any> {
+    const model = await this.modelService.getSelectedByUserId(user.id);
     const summary = await this.getSummarizeById(messageId);
     try {
-      const model = await this.modelService.getSelectedByUserId(user.id);
-
       const response = await axios.post(
         MODEL_URL + 'reply-scenarios',
         {
@@ -203,15 +204,43 @@ export class SummarizeService {
         messageId: messageId,
       };
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        { message: error.message },
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
   async replyGenerate(emailData: ReplyGenerateDto, user: any): Promise<any> {
+    const model = await this.modelService.getSelectedByUserId(user.id);
     const summary = await this.getSummarizeById(emailData.messageId);
-    try {
-      const model = await this.modelService.getSelectedByUserId(user.id);
+    const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
+    const message = await gmail.users.drafts.get({
+      userId: 'me',
+      id: emailData.draftId,
+    });
+    let attachmentIds = [];
+    if (message.data.message.payload.parts) {
+      attachmentIds = message.data.message.payload.parts.filter(
+        (part) => part.filename && part.body.attachmentId,
+      );
+    }
 
+    const attachments = await Promise.all(
+      attachmentIds.map(async (id) => {
+        const attachment = await gmail.users.messages.attachments.get({
+          userId: 'me',
+          id: id.body.attachmentId,
+          messageId: message.data.id,
+        });
+        return {
+          filename: id.filename,
+          data: attachment.data.data,
+        };
+      }),
+    );
+
+    try {
       const requestBody = summary
         ? {
             draft_id: emailData.draftId,
@@ -221,6 +250,8 @@ export class SummarizeService {
             provider: model.modelProvider,
             api_key: model.apiKey,
             api_key_type: model.apiKeyType,
+            user_id: user.id,
+            user_name: user.name,
           }
         : {
             draft_id: emailData.draftId,
@@ -229,6 +260,8 @@ export class SummarizeService {
             provider: model.modelProvider,
             api_key: model.apiKey,
             api_key_type: model.apiKeyType,
+            user_id: user.id,
+            user_name: user.name,
           };
 
       const response = await axios.post(
@@ -248,9 +281,9 @@ export class SummarizeService {
   }
 
   async chatbot(user: any, message: string): Promise<any> {
+    const model = await this.modelService.getSelectedByUserId(user.id);
     try {
       const userInfo = await this.authService.findBySessionId(user.sessionId);
-      const model = await this.modelService.getSelectedByUserId(user.id);
 
       const requestBody = {
         refresh_token: userInfo.refreshToken,
@@ -282,9 +315,9 @@ export class SummarizeService {
   }
 
   async search(user: any, message: string): Promise<any> {
+    const model = await this.modelService.getSelectedByUserId(user.id);
     try {
       const userInfo = await this.authService.findBySessionId(user.sessionId);
-      const model = await this.modelService.getSelectedByUserId(user.id);
 
       const requestBody = {
         refresh_token: userInfo.refreshToken,

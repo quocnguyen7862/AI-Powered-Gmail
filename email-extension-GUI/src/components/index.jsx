@@ -4,6 +4,7 @@ import ReplyQuickPopup from "./ReplyQuickPopup/ReplyQuickPopup";
 import SummaryPopup from "./SummaryPopup/SummaryPopup";
 import AppMenuPopup from "./AppMenuPopup/AppMenuPopup";
 import ChatbotPanel from "./ChatbotPanel/ChatbotPanel";
+import SelectLabels from "./SelectLabels/SelectLabels";
 
 function getOrCreateRoot(el) {
     if (!el.__reactRoot) {
@@ -37,5 +38,12 @@ export function createChatbotPanel({ el, session }) {
     const root = getOrCreateRoot(el);
     root.render(
         <ChatbotPanel session={session} />
+    )
+}
+
+export function createSelectLabels({ el, session }) {
+    const root = getOrCreateRoot(el);
+    root.render(
+        <SelectLabels session={session} />
     )
 }

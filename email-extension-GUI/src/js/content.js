@@ -3,20 +3,20 @@ import Api from './axios.config';
 import { URL_AUTH_CHECK, URL_CHAT_HISTORY, URL_SAVE_SENT_EMAIL, URL_SEARCH, URL_SUMMARIZE_BY_DRAFT, URL_SUMMARIZE_BY_MESSAGE, URL_TRACKING_STATUS } from './config';
 import { ThreadStatus } from './enum';
 import { getSummaryModelHtml } from '../templates/summary-modal';
-import { createAppMenuPopup, createChatbotPanel, createReplyQuickPopup, createSummaryPopup } from '../components';
+import { createAppMenuPopup, createChatbotPanel, createReplyQuickPopup, createSelectLabels, createSummaryPopup } from '../components';
 
 InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
   async function checkLogin(email) {
     try {
       const response = await Api.getWithParams(URL_AUTH_CHECK, { email: email });
       if (response.status === 200) {
-        return { isSignedIn: true, sessionId: response.data.sessionId, accessToken: response.data.jwt_accessToken };
+        return { isSignedIn: true, sessionId: response.data.sessionId, accessToken: response.data.jwt_accessToken, fullName: response.data.fullName };
       } else {
-        return { isSignedIn: false, sessionId: undefined, accessToken: undefined };
+        return { isSignedIn: false, sessionId: undefined, accessToken: undefined, fullName: undefined };
       }
     }
     catch (error) {
-      return { isSignedIn: false, sessionId: undefined, accessToken: undefined };
+      return { isSignedIn: false, sessionId: undefined, accessToken: undefined, fullName: undefined };
     }
   }
 
@@ -66,14 +66,39 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
       })
 
       sdk.Toolbars.registerThreadButton({
-        title: 'Summarize email',
-        iconUrl: 'https://img.icons8.com/sf-regular/48/overview-pages-2.png',
+        title: 'AI Label',
+        iconUrl: 'https://img.icons8.com/material-outlined/48/sparkling.png',
+        hasDropdown: true,
         onClick: async (event) => {
           try {
-            if (event.position != "THREAD") return;
-            const threadView = event.selectedThreadViews[0];
+            let threadView;
+            if (event.position === "THREAD")
+              threadView = event.selectedThreadViews[0];
+            else
+              threadView = event.selectedThreadRowViews[0];
             const threadId = await threadView.getThreadIDAsync();
-            const messageId = await messageView[messageView.length - 1].getMessageIDAsync();
+
+            createSelectLabels({ el: event.dropdown.el, session: session })
+
+
+          } catch (error) {
+          }
+        }
+      })
+
+      sdk.Toolbars.registerThreadButton({
+        title: 'Summarize email',
+        iconUrl: 'https://img.icons8.com/sf-regular/48/overview-pages-2.png',
+        hasDropdown: true,
+        onClick: async (event) => {
+          try {
+            let threadView;
+            if (event.position === "THREAD")
+              threadView = event.selectedThreadViews[0];
+            else
+              threadView = event.selectedThreadRowViews[0];
+            const threadId = await threadView.getThreadIDAsync();
+            const messageId = await threadView.getMessageViews()[0].getMessageIDAsync();
 
           } catch (error) {
           }

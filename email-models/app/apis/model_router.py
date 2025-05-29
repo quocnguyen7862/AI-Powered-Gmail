@@ -18,5 +18,5 @@ async def check_model(request:ModelRequest):
             "message": f"Model {request.model} is available."
         }
     except Exception as e:
-        raise e
+        raise HTTPException(status_code=e.status_code,detail=e.body['message'])
         

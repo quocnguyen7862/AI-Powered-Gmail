@@ -8,6 +8,7 @@ import { AuthService } from './auth/auth.service';
 import { SummarizeModule } from './summarize/summarize.module';
 import { AuthModule } from './auth/auth.module';
 import { ModelModule } from './model/model.module';
+import { LabelModule } from './label/label.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ModelModule } from './model/model.module';
     SummarizeModule,
     AuthModule,
     ModelModule,
+    LabelModule,
   ],
   controllers: [AppController],
   providers: [AppService, AuthService],
