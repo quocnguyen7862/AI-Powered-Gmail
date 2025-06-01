@@ -20,6 +20,7 @@ import {
   MODEL_URL,
 } from '@environments';
 import { ModelService } from '@/model/model.service';
+import { ChatbotDto } from './dto/chatbot-message.dto';
 
 @Injectable()
 export class SummarizeService {
@@ -101,6 +102,9 @@ export class SummarizeService {
           provider: model.modelProvider,
           api_key: model.apiKey,
           api_key_type: model.apiKeyType,
+          user_id: user.id,
+          user_name: user.name,
+          language: user.summaryLanguage,
         },
         {
           headers: {
@@ -115,6 +119,12 @@ export class SummarizeService {
           (header) => header.name === 'Subject',
         ).value,
         summary: response.data.summary,
+        userId: user.id,
+        sentAt: new Date(Number(message.data.internalDate)),
+        from: message.data.payload.headers.find(
+          (header) => header.name === 'From',
+        ).value,
+        threadId: emailData.threadId,
       });
 
       return response.data;
@@ -179,6 +189,25 @@ export class SummarizeService {
     // }
   }
 
+  async reSummarizeByMessageId(
+    emailData: EmailMessageDto,
+    user: any,
+  ): Promise<any> {
+    await this.summarizeModel.deleteOne({
+      messageId: emailData.messageId,
+      threadId: emailData.threadId,
+      userId: user.id,
+    });
+
+    return await this.summarizeByMessageId(
+      {
+        threadId: emailData.threadId,
+        messageId: emailData.messageId,
+      },
+      user,
+    );
+  }
+
   async replyScenario(messageId: string, user: any): Promise<any> {
     const model = await this.modelService.getSelectedByUserId(user.id);
     const summary = await this.getSummarizeById(messageId);
@@ -191,6 +220,8 @@ export class SummarizeService {
           provider: model.modelProvider,
           api_key: model.apiKey,
           api_key_type: model.apiKeyType,
+          user_id: user.id,
+          user_name: user.name,
         },
         {
           headers: {
@@ -252,6 +283,7 @@ export class SummarizeService {
             api_key_type: model.apiKeyType,
             user_id: user.id,
             user_name: user.name,
+            attachments: attachments,
           }
         : {
             draft_id: emailData.draftId,
@@ -262,6 +294,7 @@ export class SummarizeService {
             api_key_type: model.apiKeyType,
             user_id: user.id,
             user_name: user.name,
+            attachments: attachments,
           };
 
       const response = await axios.post(
@@ -280,7 +313,7 @@ export class SummarizeService {
     }
   }
 
-  async chatbot(user: any, message: string): Promise<any> {
+  async chatbot(user: any, message: ChatbotDto): Promise<any> {
     const model = await this.modelService.getSelectedByUserId(user.id);
     try {
       const userInfo = await this.authService.findBySessionId(user.sessionId);
@@ -295,11 +328,13 @@ export class SummarizeService {
         user_id: userInfo.userId,
         client_id: GOOGLE_CLIENT_ID,
         client_secret: GOOGLE_CLIENT_SECRET,
-        message: message,
+        message: message.message,
         model: model.model,
         provider: model.modelProvider,
         api_key: model.apiKey,
         api_key_type: model.apiKeyType,
+        user_name: user.name,
+        thread_id: message.threadId,
       };
 
       const response = await axios.post(MODEL_URL + 'chatbot', requestBody, {
@@ -334,6 +369,7 @@ export class SummarizeService {
         provider: model.modelProvider,
         api_key: model.apiKey,
         api_key_type: model.apiKeyType,
+        user_name: user.name,
       };
       const response = await axios.post(MODEL_URL + 'search', requestBody, {
         headers: {
@@ -349,12 +385,18 @@ export class SummarizeService {
 
   async getChatHistory(
     key: string,
+    isChatbot: boolean,
+    user: any,
     filterDto?: BaseFilterDto<MessageEntity>,
   ): Promise<MessageEntity[] | Pagination<MessageEntity>> {
     try {
+      if (isChatbot) {
+        key = `${user.id}_${key}`;
+      }
+
       const total = await this.redisClient.llen(key);
 
-      const start = total - filterDto.page * filterDto.limit;
+      const start = (filterDto.page - 1) * filterDto.limit;
       const end = start + filterDto.limit - 1;
 
       const safeStart = Math.max(start, 0);
@@ -393,8 +435,15 @@ export class SummarizeService {
     }
   }
 
-  async deleteChatHistory(key: string): Promise<any> {
+  async deleteChatHistory(
+    key: string,
+    isChatbot: boolean,
+    user: any,
+  ): Promise<any> {
     try {
+      if (isChatbot) {
+        key = `${user.id}_${key}`;
+      }
       const result = await this.redisClient.del(key);
       if (result === 1) {
         return { message: 'Chat history deleted successfully' };
@@ -404,6 +453,32 @@ export class SummarizeService {
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
+  }
+
+  async getThreadHistory(user: any): Promise<any> {
+    const stream = this.redisClient.scanStream({
+      match: `${user.id}_*`,
+    });
+
+    const threadHistory = [];
+
+    for await (const resultKeys of stream) {
+      for (const key of resultKeys) {
+        const type = await this.redisClient.type(key);
+
+        if (type === 'list') {
+          const firstElement = await this.redisClient.lindex(key, -1);
+          threadHistory.push({ key, value: firstElement });
+        }
+      }
+    }
+
+    return threadHistory.map((item) => {
+      return {
+        key: item.key.split('_')[1],
+        value: JSON.parse(item.value).content,
+      };
+    });
   }
 
   async saveSummarize(
@@ -416,5 +491,30 @@ export class SummarizeService {
   async getSummarizeById(id: string): Promise<SummarizeEntity> {
     const summary = await this.summarizeModel.findOne({ messageId: id });
     return summary;
+  }
+
+  async getSummarizeByUserId(
+    user: any,
+    filter: BaseFilterDto<SummarizeEntity>,
+  ): Promise<SummarizeEntity[] | Pagination<SummarizeEntity>> {
+    const [summaries, total] = await Promise.all([
+      this.summarizeModel
+        .find({ userId: user.id })
+        .skip(filter.skip)
+        .limit(filter.limit)
+        .sort({ sentAt: -1 }), // sắp xếp mới nhất trước (nếu muốn)
+      this.summarizeModel.countDocuments({ userId: user.id }),
+    ]);
+
+    const totalPages = Math.ceil(total / filter.limit);
+    const nextPage = filter.page < totalPages ? filter.page + 1 : null;
+
+    return { data: summaries, total, page: filter.page, nextPage };
+  }
+
+  async updateLanguage(user: any, language: string): Promise<any> {
+    return await this.authService.updateByUserId(user.id, {
+      summaryLanguage: language,
+    });
   }
 }

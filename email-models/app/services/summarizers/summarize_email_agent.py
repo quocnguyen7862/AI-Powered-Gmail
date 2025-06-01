@@ -18,7 +18,6 @@ Yêu cầu:
 - Trình bày đoạn văn (không dùng bullet)
 - Giữ nội dung 3–5 câu, rõ ràng, mạch lạc
 - Bỏ qua chào hỏi và chữ ký
-- Viết bằng tiếng Việt
 """
 
 prompt = ChatPromptTemplate.from_messages([

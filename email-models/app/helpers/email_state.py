@@ -1,6 +1,7 @@
 from typing import TypedDict, List
 
 class EmailState(TypedDict):
+    language: str
     email_text: str
     email_extracted: str
     email_summary: str

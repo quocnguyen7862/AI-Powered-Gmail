@@ -17,7 +17,7 @@ export class ModelService extends BaseService<ModelEntity> {
     super(MessageName.MODEL, modelRepo);
   }
 
-  async checkModel(dto: CheckModelDto): Promise<any> {
+  async checkModel(dto: CheckModelDto, user: any): Promise<any> {
     try {
       const reponse = await axios.post(
         MODEL_URL + 'model/check',
@@ -26,6 +26,8 @@ export class ModelService extends BaseService<ModelEntity> {
           provider: dto.provider,
           api_key: dto.apiKey,
           api_key_type: dto.apiKeyType,
+          user_id: user.id,
+          user_name: user.name,
         },
         {
           headers: {

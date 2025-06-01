@@ -1,12 +1,29 @@
 from langgraph.prebuilt import create_react_agent
 from helpers.search_state import SearchState
-from langchain_core.messages import ToolMessage,AIMessage
+from langchain_core.messages import ToolMessage,AIMessage,SystemMessage
 import pprint
 import json
 
+system_msg = f"""
+You are a helpful assistant with access to Gmail.
+
+Your sole task is to **search for emails** that match the user's request and return them.
+
+Instructions:
+- Focus only on searching emails. Ignore requests unrelated to search.
+- If relevant emails are found, always return their full details, including:
+    - Sender
+    - Subject
+    - Date
+    - Snippet or preview of content
+- If no emails are found, reply clearly that nothing relevant was found.
+- Do not generate summaries, suggestions, or take any other actions.
+"""
+
 class SearchAgent:
+
     def __init__(self,llm,tools):
-        self.excutor = create_react_agent(llm, tools)
+        self.excutor = create_react_agent(model=llm,tools=tools,prompt=SystemMessage(content=system_msg))
 
     def __call__(self, state:SearchState):
         messages = state['messages']

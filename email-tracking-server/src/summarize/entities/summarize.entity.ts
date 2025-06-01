@@ -2,10 +2,16 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 @Schema({ collection: 'email_summaries' })
 export class SummarizeEntity {
-  @Prop({ type: Object })
-  from: object;
+  @Prop()
+  userId: string;
+  @Prop()
+  sentAt: Date;
+  @Prop()
+  from: string;
   @Prop()
   messageId: string;
+  @Prop()
+  threadId: string;
   @Prop()
   subject: string;
   @Prop()

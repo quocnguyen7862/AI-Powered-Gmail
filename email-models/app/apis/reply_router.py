@@ -18,7 +18,7 @@ async def reply_generate(request: ReplyRequest):
             # messages=[HumanMessage(f"Tóm tắt: {request.summary}\n\nYêu cầu: {request.message}")],
             message=HumanMessage(request.message),
             summary=request.summary,
-            user_name=request.user_name or "Người dùng",
+            user_name=request.user_name or "Không có tên người dùng",
             attachments=request.attachments
         )
 
@@ -26,12 +26,11 @@ async def reply_generate(request: ReplyRequest):
         replay_workflow  = create_agent_graph(
             model_name=request.model, 
             api_key_type=request.api_key_type, 
-            api_key=request.api_key,
-            draft_id=request.draft_id)
+            api_key=request.api_key)
         
-        config = RunnableConfig(configurable={"thread_id": request.draft_id})
+        config = RunnableConfig(configurable={"thread_id": request.draft_id,"user_id":request.user_id})
         
-        result = replay_workflow .invoke(state,config=config)
+        result = replay_workflow.invoke(state,config=config)
         result_messages = result.get("messages", [])
         ai_messages = [
             m

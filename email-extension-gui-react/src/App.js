@@ -8,8 +8,8 @@ import SelectLabels from './components/SelectLabels';
 function App() {
   return (
     <>
-      {/* <ReplyQuickPopup />
-      <SummaryPopup /> */}
+      <ReplyQuickPopup />
+      <SummaryPopup />
       <AppMenuPopup />
       <SelectLabels />
     </>

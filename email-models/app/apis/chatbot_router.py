@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from .requests.chatbot_request import ChatbotRequest
 from services.chatbot import create_agent_graph
 from app.helpers.chatbot_state import ChatbotState
-from langchain_core.messages.human import HumanMessage
+from langchain_core.messages import HumanMessage, AIMessage, AIMessageChunk,SystemMessage
 from langchain_community.tools.gmail.utils import get_gmail_credentials
 from langchain_core.runnables import RunnableConfig
 import os
@@ -41,27 +41,35 @@ async def chatbot(request: ChatbotRequest):
 
         state = ChatbotState(
             messages=[HumanMessage(request.message)],
+            user_name=request.user_name or "Không có tên người dùng",
         )
 
         chatbot_workflow = create_agent_graph(
             creds,
             model_name=request.model,
             api_key_type= request.api_key_type,
-            api_key=request.api_key
+            api_key=request.api_key,
         )
 
-        config = RunnableConfig(configurable={"thread_id":"fksldjflsklsjflks","user_id":request.user_id})
+        config = RunnableConfig(configurable={"thread_id":request.thread_id,"user_id":request.user_id})
 
-        result = chatbot_workflow.stream(state,config=config,stream_mode="values")
-        for chunk in result:
-            print(pprint.pp(chunk))
-        reply = result['messages'][-1]
-        response = {
-            "output": getattr(reply, "content", None),
-            "metadata": getattr(reply, "response_metadata", None),
-            "id": getattr(reply, "id", None),
-            "usage": getattr(reply, "usage_metadata", None),
-        }
-        return response
+        result = chatbot_workflow.invoke(state,config=config)
+        result_messages = result.get("messages", [])
+        ai_messages = [
+            m
+            for m in result_messages
+            if isinstance(m, AIMessage) or isinstance(m, AIMessageChunk)
+        ]
+        if ai_messages:
+            agent_response = ai_messages[-1]
+            response = {
+                "output": getattr(agent_response, "content", None),
+                "metadata": getattr(agent_response, "response_metadata", None),
+                "id": getattr(agent_response, "id", None),
+                "usage": getattr(agent_response, "usage_metadata", None),
+            }
+            return response
+        else:
+            raise HTTPException(status_code=500, detail="Workflow did not complete successfully")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error chatbot: {str(e)}")

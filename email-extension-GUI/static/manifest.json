@@ -32,8 +32,5 @@
         "resources": ["*.map"],
         "matches": ["https://mail.google.com/*"]
       }
-    ],
-    "action":{
-      "default_popup": "popup.html"
-    }
+    ]
 }

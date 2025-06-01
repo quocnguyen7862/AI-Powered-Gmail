@@ -27,7 +27,6 @@ const handler = NextAuth({
   ],
   callbacks: {
     async signIn(data) {
-      console.log("🚀 ~ signIn ~ data:", data);
       try {
         const { user, account, profile } = data;
         await Api.post(AUTH_SESSION, {
@@ -45,7 +44,6 @@ const handler = NextAuth({
 
         return true;
       } catch (e) {
-        console.log("Error in signIn", e);
         return false;
       }
     },
@@ -56,6 +54,9 @@ const handler = NextAuth({
         });
         if (res.status == 200) {
           session.accessToken = res.data.jwt_accessToken;
+          if (session.user) {
+            session.user.summaryLanguage = res.data.summaryLanguage;
+          }
         }
         session.expires = token.expiresAt as any;
       } catch (e: any) {

@@ -16,6 +16,7 @@ async def summarize(request: EmailRequest):
         html_content = decoded_email.decode('utf-8')
 
         state = EmailState(
+            language=request.language,
             email_text=html_content,
             email_extracted="",
             email_summary="",

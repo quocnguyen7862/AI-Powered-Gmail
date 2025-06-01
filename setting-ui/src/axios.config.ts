@@ -4,7 +4,7 @@ import { serverConfig } from "./config";
 
 const API_URL = serverConfig.api;
 
-const defaultOptions = { timeout: 5000 };
+const defaultOptions = {};
 
 axios.interceptors.request.use(async (config) => {
   const session = await getSession();

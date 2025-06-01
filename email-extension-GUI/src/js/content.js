@@ -3,14 +3,20 @@ import Api from './axios.config';
 import { URL_AUTH_CHECK, URL_CHAT_HISTORY, URL_SAVE_SENT_EMAIL, URL_SEARCH, URL_SUMMARIZE_BY_DRAFT, URL_SUMMARIZE_BY_MESSAGE, URL_TRACKING_STATUS } from './config';
 import { ThreadStatus } from './enum';
 import { getSummaryModelHtml } from '../templates/summary-modal';
-import { createAppMenuPopup, createChatbotPanel, createReplyQuickPopup, createSelectLabels, createSummaryPopup } from '../components';
+import { createAppMenuPopup, createChatbotPanel, createReplyQuickPopup, createSelectLabels, createSummaryButton, createSummaryPopup } from '../components';
 
 InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
   async function checkLogin(email) {
     try {
       const response = await Api.getWithParams(URL_AUTH_CHECK, { email: email });
       if (response.status === 200) {
-        return { isSignedIn: true, sessionId: response.data.sessionId, accessToken: response.data.jwt_accessToken, fullName: response.data.fullName };
+        return {
+          isSignedIn: true,
+          sessionId: response.data.sessionId,
+          accessToken: response.data.jwt_accessToken,
+          fullName: response.data.fullName,
+          email: response.data.email
+        };
       } else {
         return { isSignedIn: false, sessionId: undefined, accessToken: undefined, fullName: undefined };
       }
@@ -57,7 +63,7 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
         composeView.on("destroy", async (event) => {
           try {
             const draftId = await composeView.getDraftID();
-            await Api.delete(URL_CHAT_HISTORY + `/${draftId}`);
+            await Api.delete(URL_CHAT_HISTORY + `/${draftId}`, {}, session?.accessToken);
           }
           catch (error) {
             console.log("🚀 ~ error:", error)
@@ -65,30 +71,30 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
         })
       })
 
-      sdk.Toolbars.registerThreadButton({
-        title: 'AI Label',
-        iconUrl: 'https://img.icons8.com/material-outlined/48/sparkling.png',
-        hasDropdown: true,
-        onClick: async (event) => {
-          try {
-            let threadView;
-            if (event.position === "THREAD")
-              threadView = event.selectedThreadViews[0];
-            else
-              threadView = event.selectedThreadRowViews[0];
-            const threadId = await threadView.getThreadIDAsync();
+      // sdk.Toolbars.registerThreadButton({
+      //   title: 'AI Label',
+      //   iconUrl: 'https://img.icons8.com/material-outlined/48/sparkling.png',
+      //   hasDropdown: true,
+      //   onClick: async (event) => {
+      //     try {
+      //       let threadView;
+      //       if (event.position === "THREAD")
+      //         threadView = event.selectedThreadViews[0];
+      //       else
+      //         threadView = event.selectedThreadRowViews[0];
+      //       const threadId = await threadView.getThreadIDAsync();
 
-            createSelectLabels({ el: event.dropdown.el, session: session })
+      //       createSelectLabels({ el: event.dropdown.el, session: session })
 
 
-          } catch (error) {
-          }
-        }
-      })
+      //     } catch (error) {
+      //     }
+      //   }
+      // })
 
       sdk.Toolbars.registerThreadButton({
         title: 'Summarize email',
-        iconUrl: 'https://img.icons8.com/sf-regular/48/overview-pages-2.png',
+        iconUrl: 'https://img.icons8.com/pulsar-color/48/fine-print.png',
         hasDropdown: true,
         onClick: async (event) => {
           try {
@@ -98,7 +104,9 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
             else
               threadView = event.selectedThreadRowViews[0];
             const threadId = await threadView.getThreadIDAsync();
-            const messageId = await threadView.getMessageViews()[0].getMessageIDAsync();
+
+            event.dropdown.el.className += " !rounded-[12px] !mt-3 min-w-[400px] -translate-x-1/2";
+            createSummaryPopup({ el: event.dropdown.el, threadId: threadId, messageId: threadId, session: session });
 
           } catch (error) {
           }
@@ -116,7 +124,7 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
         const bodyElement = messageView.getBodyElement();
 
         if (bodyElement) {
-          createSummaryPopup({ el: bodyElement.insertAdjacentElement('beforebegin', document.createElement('div')), threadId: threadId, messageId: messageId, session: session });
+          createSummaryButton({ el: bodyElement.insertAdjacentElement('beforebegin', document.createElement('div')), threadId: threadId, messageId: messageId, session: session });
         }
       })
 
@@ -172,21 +180,30 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
         draftId = await composeView.getDraftID();
 
         const button = composeView.addButton({
-          title: 'Reply Quickly',
-          iconUrl: 'https://img.icons8.com/material-outlined/48/sparkling.png',
+          title: 'Ai Generated Reply',
+          iconUrl: 'https://img.icons8.com/pulsar-color/48/ai-generated-text.png',
           iconClass: 'm-[-4px] w-[20px] h-[20px]',
           hasDropdown: true,
           onClick: async ({ dropdown }) => {
             createReplyQuickPopup({ el: dropdown.el, threadId: threadId, draftId: draftId, composeView: composeView, session: session });
           }
         })
+
+        composeView.on("discard", async (event) => {
+          try {
+            await Api.delete(URL_CHAT_HISTORY + `/${draftId}`, {}, session?.accessToken);
+          } catch (error) {
+            console.log("🚀 ~ error:", error)
+          }
+        })
       })
 
       const chatbotPanelEl = document.createElement('div');
+      chatbotPanelEl.className = 'h-full';
       sdk.Global.addSidebarContentPanel(
         {
-          title: 'AI Powered Gmail',
-          iconUrl: 'https://img.icons8.com/sf-regular/48/overview-pages-2.png',
+          title: 'AI Assistant',
+          iconUrl: 'https://img.icons8.com/pulsar-color/48/message-bot.png',
           el: chatbotPanelEl,
         }
       ).then((panel) => {
@@ -208,7 +225,7 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
           {
             name: 'Search by semantics: ' + query,
             onClick: () => {
-              sdk.Router.goto("semantic-search")
+              sdk.Router.goto(`semantic-search/${query}`);
             }
           }
         ]

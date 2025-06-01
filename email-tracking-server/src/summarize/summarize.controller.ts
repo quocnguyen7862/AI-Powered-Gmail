@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
@@ -16,10 +17,36 @@ import { EmailMessageDto } from './dto/email-message.dto';
 import { Auth } from '@/common/decorators/auth.decorator';
 import { User } from '@/common/decorators/user.decorator';
 import { ChatbotDto } from './dto/chatbot-message.dto';
+import { SummarizeEntity } from './entities/summarize.entity';
 
 @Controller('summarize')
+@Auth()
 export class SummarizeController {
   constructor(private readonly summarizeService: SummarizeService) {}
+
+  @Get()
+  async getSummaries(
+    @User() user: any,
+    @Query() filter: BaseFilterDto<SummarizeEntity>,
+  ): Promise<any> {
+    const result = await this.summarizeService.getSummarizeByUserId(
+      user,
+      filter,
+    );
+    return result;
+  }
+
+  @Post('regenerate')
+  async reSummarize(
+    @Body() emailData: EmailMessageDto,
+    @User() user: any,
+  ): Promise<string> {
+    const result = await this.summarizeService.reSummarizeByMessageId(
+      emailData,
+      user,
+    );
+    return result;
+  }
 
   @Post('by-message')
   @Auth()
@@ -69,23 +96,44 @@ export class SummarizeController {
 
   @Get('chat-history/:draftId')
   async getChatHistory(
+    @User() user: any,
     @Param('draftId') draftId: string,
     @Query() filter: BaseFilterDto<MessageEntity>,
+    @Query('isChatbot') isChatbot?: boolean,
   ): Promise<any> {
-    const result = await this.summarizeService.getChatHistory(draftId, filter);
+    const result = await this.summarizeService.getChatHistory(
+      draftId,
+      isChatbot,
+      user,
+      filter,
+    );
+    return result;
+  }
+
+  @Get('thread-history')
+  async getThreadHistory(@User() user: any): Promise<any> {
+    const result = await this.summarizeService.getThreadHistory(user);
     return result;
   }
 
   @Delete('chat-history/:draftId')
-  async deleteChatHistory(@Param('draftId') draftId: string): Promise<any> {
-    const result = await this.summarizeService.deleteChatHistory(draftId);
+  async deleteChatHistory(
+    @User() user: any,
+    @Param('draftId') draftId: string,
+    @Query('isChatbot') isChatbot?: boolean,
+  ): Promise<any> {
+    const result = await this.summarizeService.deleteChatHistory(
+      draftId,
+      isChatbot,
+      user,
+    );
     return result;
   }
 
   @Post('chatbot')
   @Auth()
   async chatbot(@User() user: any, @Body() message: ChatbotDto): Promise<any> {
-    const result = await this.summarizeService.chatbot(user, message.message);
+    const result = await this.summarizeService.chatbot(user, message);
     return result;
   }
 
@@ -93,6 +141,15 @@ export class SummarizeController {
   @Auth()
   async search(@User() user: any, @Body() message: ChatbotDto): Promise<any> {
     const result = await this.summarizeService.search(user, message.message);
+    return result;
+  }
+
+  @Patch('language/:language')
+  async updateLanguage(
+    @User() user: any,
+    @Param('language') language: string,
+  ): Promise<any> {
+    const result = await this.summarizeService.updateLanguage(user, language);
     return result;
   }
 }

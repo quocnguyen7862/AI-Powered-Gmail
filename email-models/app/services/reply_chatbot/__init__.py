@@ -16,13 +16,13 @@ with (RedisStore.from_conn_string(REDIS_URL) as store,
     store.setup()
     checkpointer.setup()
 
-    def create_agent_graph(model_name: str = 'gpt-4o-mini', api_key_type='OPENAI_API_KEY', api_key: str = '',draft_id:str=None) -> StateGraph:
+    def create_agent_graph(model_name: str = 'gpt-4o-mini', api_key_type='OPENAI_API_KEY', api_key: str = '') -> StateGraph:
         # Initialize agents
         os.environ[api_key_type] = api_key
         llm = init_chat_model(model_name)
         llm_with_tool = llm.bind_tools([get_email_summary])
 
-        generate_reply = GenerateReplyAgent(llm,draft_id)
+        generate_reply = GenerateReplyAgent(llm)
         summarize_attachments = SummarizeAttachmentsAgent(llm)
 
         # Create summarizer workflow
@@ -37,7 +37,7 @@ with (RedisStore.from_conn_string(REDIS_URL) as store,
             "SummarizeAttachments",
             check_attachments
         )
-        workflow.add_edge("SummarizeAttachments", "GenerateReply")
+        # workflow.add_edge("SummarizeAttachments", "GenerateReply")
         workflow.add_edge("GenerateReply", END)
 
         # Set entry point
@@ -54,5 +54,5 @@ with (RedisStore.from_conn_string(REDIS_URL) as store,
     
     def check_attachments(state: ReplyState):
         if state['attachments'] and len(state['attachments']) > 0:
-            return "SummarizeAttachments"
+            return "GenerateReply"
         return "GenerateReply"

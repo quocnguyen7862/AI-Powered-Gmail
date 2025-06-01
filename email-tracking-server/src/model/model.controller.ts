@@ -68,8 +68,8 @@ export class ModelController {
 
   @Post('check')
   @Auth()
-  async checkModel(@Body() checkModelDto: CheckModelDto) {
-    const result = await this.modelService.checkModel(checkModelDto);
+  async checkModel(@Body() checkModelDto: CheckModelDto, @User() user: any) {
+    const result = await this.modelService.checkModel(checkModelDto, user);
     return result;
   }
 }

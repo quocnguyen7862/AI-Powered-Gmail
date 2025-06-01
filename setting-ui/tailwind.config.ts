@@ -12,6 +12,14 @@ const config: Config = {
   theme: {
     fontFamily: {
       satoshi: ["Satoshi", "sans-serif"],
+      google: [
+        "Google Sans",
+        "Roboto",
+        "RobotoDraft",
+        "Helvetica",
+        "Arial",
+        "sans-serif",
+      ],
     },
     screens: {
       "2xsm": "375px",

@@ -15,6 +15,8 @@ def create_agent_graph(gmail_creds,model_name: str = 'gpt-4o-mini', api_key_type
     toolkit = GmailToolkit(api_resource=api_resource)
     tools = [
         GmailSearch(api_resource=api_resource),
+        GmailGetMessage(api_resource=api_resource),
+        GmailGetThread(api_resource=api_resource),
     ]
 
     # Initialize agents

@@ -17,6 +17,8 @@ async def check_model(request:ModelRequest):
             "status": "success",
             "message": f"Model {request.model} is available."
         }
+    except ImportError as e:
+        raise HTTPException(status_code=500, detail=f"The model {request.model} has not been supported")
     except Exception as e:
         raise HTTPException(status_code=e.status_code,detail=e.body['message'])
         

@@ -52,9 +52,9 @@ const models = [
     ],
   },
   {
-    name: "Grod",
-    provider: "grod",
-    apiKeyType: "GROQ_API_KEY",
+    name: "xAI",
+    provider: "xai",
+    apiKeyType: "XAI_API_KEY",
     models: ["grok-3-latest", "grok-3-fast-latest", "grok-3-mini-fast-latest"],
   },
 ];

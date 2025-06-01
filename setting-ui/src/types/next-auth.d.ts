@@ -5,7 +5,14 @@ declare module "next-auth" {
   // eslint-disable-next-line no-unused-vars
   interface Session {
     accessToken?: string;
-    user?: undefined | DefaultSession["user"];
+    user?:
+      | undefined
+      | {
+          name?: string | null;
+          email?: string | null;
+          image?: string | null;
+          summaryLanguage?: string;
+        };
   }
 
   // eslint-disable-next-line no-unused-vars

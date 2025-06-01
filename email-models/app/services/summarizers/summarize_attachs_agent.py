@@ -20,7 +20,7 @@ Yêu cầu:
 2. Trình bày các luận điểm, dữ kiện, kết luận quan trọng
 3. Giữ mạch văn logic và khách quan
 4. Không đưa ra nhận xét hoặc thông tin không có trong tài liệu
-5. Viết bằng tiếng Việt"""
+"""
 
 prompt = ChatPromptTemplate.from_messages([
     SystemMessagePromptTemplate.from_template(system_msg),
@@ -59,6 +59,7 @@ class SummarizeAttachmentsAgent:
                 except Exception as e:
                     print(f"Error removing file {file_location}: {str(e)}")
             
+            state["attachments"] = []
             state['attachment_summaries']=summaries
             return state
         except Exception as e:

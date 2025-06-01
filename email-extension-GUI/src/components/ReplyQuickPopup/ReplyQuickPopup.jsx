@@ -55,25 +55,18 @@ export default function ReplyQuickPopup({ threadId, draftId, composeView, sessio
             const humanMessage = data[i].message;
             const aiMessage = data[i + 1].message;
 
-            const newMessages = messages.concat(
+            historyMessages.push(
                 <div key={messages.length + i + 1}>
-                    {(messages.length > 0) && <Divider className="!m-0" />}
+                    {(historyMessages.length > 0) && <Divider className="!m-0" />}
                     <UserMessage text={humanMessage} />
                     <BotMessage preMesssage={aiMessage} composeView={composeView} canInsert={true} />
                 </div>
             )
-            historyMessages.push(newMessages);
         }
-        setMessages(prev => [...prev, ...historyMessages]);
+        setMessages(prev => [...historyMessages, ...prev]);
     }
 
     useEffect(() => {
-        async function loadSummary() {
-            setMessages([
-                <BotMessage key={0} fetchMessage={fetchSummary} />
-            ])
-        }
-
         async function loadChatHistory() {
             const data = await fetchChatHistory(1);
             const historyMessages = []
@@ -81,28 +74,29 @@ export default function ReplyQuickPopup({ threadId, draftId, composeView, sessio
                 const humanMessage = data[i].message;
                 const aiMessage = data[i + 1].message;
 
-                const newMessages = messages.concat(
+                historyMessages.push(
                     <div key={messages.length + i + 1}>
-                        {(messages.length > 0) && <Divider className="!m-0" />}
+                        {(historyMessages.length > 0) && <Divider className="!m-0" />}
                         <UserMessage text={humanMessage} />
                         <BotMessage preMesssage={aiMessage} composeView={composeView} canInsert={true} />
                     </div>
                 )
-                historyMessages.push(newMessages);
             }
             setMessages(prev => [...prev, ...historyMessages]);
         }
 
         if (!!draftId) {
             if (!!threadId) {
-                loadSummary();
+                setMessages([
+                    <BotMessage key={0} fetchMessage={fetchSummary} />
+                ])
             }
             loadChatHistory();
         }
     }, [threadId, draftId]);
 
     useEffect(() => {
-        if (!!messageId) {
+        if (!!messageId && messages.length === 0) {
             fetchScenarios(messageId).then((data) => {
                 setScenarios([...data.output.map((item) => ({ ...item, messageId: data.messageId }))]);
             })
@@ -151,25 +145,30 @@ export default function ReplyQuickPopup({ threadId, draftId, composeView, sessio
 
     return (
         <div className="chatbot rounded-[3px] bg-white text-center flex flex-col w-[400px] h-[500px] overflow-hidden">
-            <Header />
-            <Messages messages={messages} loadMoreMessages={loadMoreMessages} />
+            <Header title={"AI Generated Reply"} />
+            <Messages className="h-dvh" messages={messages} loadMoreMessages={loadMoreMessages} />
             <Input onSend={handleSend} scenarios={scenarios} handleScenarioClick={handleScenarioClick} />
         </div>
     );
 }
 
-export const Header = () => {
+export const Header = ({ title, children }) => {
     return (
-        <div className="header p-1 text-center max-h-[58px] text-base font-bold bg-[#005b9c] text-white">&nbsp;Reply Quickly</div>
+        <div className="flex bg-[#005b9c] p-1" style={{ position: "sticky", top: 0, zIndex: 1000 }}>
+            <p className="header w-full flex-1 text-center max-h-[58px] text-base font-bold text-white" >
+                &nbsp;{title}
+            </p>
+            {children}
+        </div>
     )
 }
 
-export const Messages = ({ messages, loadMoreMessages }) => {
+export const Messages = ({ messages, loadMoreMessages, className }) => {
     const el = useRef(null);
 
     const handleScroll = async (e) => {
         const { scrollTop, clientHeight, scrollHeight } = e.target;
-        if (scrollTop === 0) {
+        if (scrollTop === 0 && loadMoreMessages !== undefined) {
             await loadMoreMessages();
         }
     }
@@ -179,7 +178,7 @@ export const Messages = ({ messages, loadMoreMessages }) => {
     }, [messages]);
 
     return (
-        <div className='messages w-full h-dvh overflow-auto flex flex-col p-[10px_0]' onScroll={handleScroll}>
+        <div className={`${className ? className : ""} text-sm leading-5 messages w-full overflow-auto flex flex-col p-[10px_0]`} onScroll={handleScroll}>
             {messages}
             <div id="el" ref={el} />
         </div>
@@ -200,7 +199,7 @@ export const Input = ({ onSend, scenarios, handleScenarioClick }) => {
     }
 
     return (
-        <div className='input relative bg-[#f5f5f5]'>
+        <div className='input bg-[#f5f5f5] w-full' style={{ bottom: 0, position: "sticky" }}>
             {scenarios?.length > 0 && (
                 <ul className='divide-y divide-slate-200'>
                     {scenarios.map((scenario, index) => (
@@ -258,7 +257,7 @@ export const BotMessage = ({ fetchMessage, canInsert, isSummary, composeView, pr
             setLoading(false);
         }
 
-        if (fetchMessage) {
+        if (fetchMessage !== undefined) {
             loadMessage();
         } else {
             setMessage(preMesssage);

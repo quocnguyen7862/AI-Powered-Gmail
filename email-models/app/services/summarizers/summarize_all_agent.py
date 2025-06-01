@@ -6,20 +6,22 @@ from langchain.prompts.chat import (
 from app.helpers.email_state import EmailState
 
 # Prompt system
-system_msg = """Bạn là trợ lý AI có nhiệm vụ tổng hợp nội dung từ email và các tệp đính kèm để tạo một bản tóm tắt duy nhất, rõ ràng và mạch lạc.
+system_msg = """Bạn là trợ lý AI có nhiệm vụ tổng hợp nội dung từ email và các tệp đính kèm để tạo một bản tóm tắt rõ ràng, súc tích, dưới dạng các gạch đầu dòng ngắn.
 
 Yêu cầu:
-1. Nhận biết chủ đề chính của toàn bộ thông điệp
-2. Trình bày các thông tin quan trọng theo thứ tự ưu tiên
-3. Tạo đoạn văn duy nhất, không phân loại theo nguồn
-4. Giữ đúng giọng điệu, ngữ cảnh và không bổ sung suy luận cá nhân
-5. Viết bằng tiếng Việt"""
+1. Nhận biết chủ đề chính và trình bày trong 1 dòng nếu có thể
+2. Chỉ giữ lại thông tin quan trọng nhất, loại bỏ chi tiết không cần thiết
+3. Mỗi gạch đầu dòng chỉ nên dài 1 câu ngắn, truyền đạt rõ ràng một ý
+4. Không phân loại theo nguồn, chỉ tổng hợp nội dung cốt lõi
+5. Giữ đúng ngữ điệu, ngữ cảnh và không suy luận thêm
+6. Sử dụng ngôn ngữ đầu vào hoặc do người dùng chỉ định
+"""
 
 # Prompt tổng hợp
 prompt = ChatPromptTemplate.from_messages([
     SystemMessagePromptTemplate.from_template(system_msg),
     HumanMessagePromptTemplate.from_template(
-        "Dữ liệu đầu vào:\n {summaries}\n"
+        "Dữ liệu đầu vào:\n {summaries}\n Ngôn ngữ: {language}\n"
     )
 ])
 
@@ -33,7 +35,7 @@ class SummarizeAllAgent:
         summaries = state['email_summary'] + state['attachment_summaries']
 
         # Tạo tóm tắt cuối cùng
-        result = self.llm_chain.invoke({"summaries": summaries})
+        result = self.llm_chain.invoke({"summaries": summaries, "language": state['language']})
 
         state['final_summary'] = result
         state['current_agent']="SummarizeAll"

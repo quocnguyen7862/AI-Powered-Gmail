@@ -1,4 +1,5 @@
 from .model_request import ModelRequest
+from typing import Optional
 
 class ChatbotRequest(ModelRequest):
     message: str
@@ -10,3 +11,4 @@ class ChatbotRequest(ModelRequest):
     scope: str
     client_id: str
     client_secret: str
+    thread_id: Optional[str] = None

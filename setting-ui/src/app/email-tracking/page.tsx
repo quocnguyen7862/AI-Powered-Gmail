@@ -1,96 +1,153 @@
 "use client";
+import Api from "@/axios.config";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import React, { useState } from "react";
-import Chart from "react-apexcharts";
+import { URL_TRACKING_STATS } from "@/constants/endpoints";
+import { DatePicker, DatePickerProps } from "antd";
+import dayjs from "dayjs";
+import React, { useEffect, useState } from "react";
+
+const DATE_FORMAT = "YYYY/MM/DD";
 
 const GmailTrackingPage: React.FC = () => {
-  const [dateRange, setDateRange] = useState<[string, string]>([
-    "2024-05-01",
-    "2024-05-11",
-  ]);
+  const [startDate, setStartDate] = useState(
+    dayjs().subtract(6, "day").format(DATE_FORMAT),
+  );
+  const [endDate, setEndDate] = useState(dayjs().format(DATE_FORMAT));
+  const [trackingStats, setTrackingStats] = useState({
+    sentCount: 0,
+    openedCount: 0,
+    unopenedCount: 0,
+  });
 
-  // Dữ liệu mẫu cho biểu đồ
-  const chartOptions = {
-    chart: { id: "gmail-tracking" },
-    xaxis: { categories: ["01/05", "02/05", "03/05", "04/05", "05/05"] },
+  const fetchTrackingStats = async () => {
+    try {
+      const response = await Api.getWithParams(URL_TRACKING_STATS, {
+        startDate: startDate,
+        endDate: endDate,
+      });
+      setTrackingStats(response.data);
+    } catch (error) {}
   };
-  const chartSeries = [
-    { name: "Đã gửi", data: [20, 30, 25, 40, 35] },
-    { name: "Đã mở", data: [10, 18, 15, 22, 20] },
-    { name: "Đã trả lời", data: [2, 5, 3, 7, 4] },
-  ];
+
+  const customWeekStartEndFormat: DatePickerProps["format"] = (value) =>
+    `${dayjs(value).format(DATE_FORMAT)} ~ ${dayjs(value).format(DATE_FORMAT)}`;
+
+  const onChangeDate = (dates: any, dateStrings: any) => {
+    setStartDate(dateStrings[0]);
+    setEndDate(dateStrings[1]);
+  };
+
+  useEffect(() => {
+    fetchTrackingStats();
+  }, [startDate, endDate]);
 
   return (
     <DefaultLayout>
-      <div className="mx-auto">
-        <Breadcrumb pageName="Gmail Tracking Statistics" />
-
-        {/* Bộ lọc thời gian */}
-        <div className="mb-6 flex gap-4">
-          <label className="font-medium">Khoảng thời gian:</label>
-          <input
-            type="date"
-            value={dateRange[0]}
-            onChange={(e) => setDateRange([e.target.value, dateRange[1]])}
-          />
-          <span>-</span>
-          <input
-            type="date"
-            value={dateRange[1]}
-            onChange={(e) => setDateRange([dateRange[0], e.target.value])}
-          />
-        </div>
-
-        {/* Các chỉ số tổng quan */}
-        <div className="mb-8 grid grid-cols-3 gap-6">
-          <div className="rounded bg-white p-4 shadow">
-            <div className="text-sm text-gray-500">Tổng email đã gửi</div>
-            <div className="text-2xl font-bold">150</div>
+      <div className="mx-auto max-w-[970px]">
+        <Breadcrumb pageName="Gmail Tracking Reports" />
+        <div className="grid grid-cols-4 gap-8">
+          <div className="col-span-4">
+            <div className="rounded-sm border border-stroke bg-white px-[30px] py-[20px] shadow-default dark:border-strokedark dark:bg-boxdark">
+              <div className="flex items-center justify-between">
+                <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
+                  Summary reports
+                </h4>
+                <DatePicker.RangePicker
+                  onChange={onChangeDate}
+                  maxDate={dayjs().endOf("day")}
+                  format={DATE_FORMAT}
+                  defaultValue={[
+                    dayjs(startDate, DATE_FORMAT),
+                    dayjs(endDate, DATE_FORMAT),
+                  ]}
+                  getPopupContainer={(node) =>
+                    document.getElementById("date-picker-container") || node
+                  }
+                  showTime={true}
+                  panelRender={(panel) => (
+                    <div>
+                      {React.isValidElement(panel)
+                        ? React.cloneElement(panel, {})
+                        : panel}
+                      <style>
+                        {`
+                          .ant-picker-time-panel {
+                              display: none !important;
+                          }
+                          `}
+                      </style>
+                    </div>
+                  )}
+                />
+              </div>
+              <div className="font-google flex justify-between gap-6">
+                <div className="flex h-[100px] w-[32.8%] items-center justify-center gap-6 rounded-[5px] bg-[#f4f7f9]">
+                  <div className="h-[60px] w-[60px] rounded-md bg-white p-2">
+                    <img
+                      width="48"
+                      height="48"
+                      src="https://img.icons8.com/pulsar-gradient/48/postcode.png"
+                      alt="postcode"
+                    />
+                  </div>
+                  <div className="box-border">
+                    <p className="mb-[3px] text-[32px] font-bold leading-[1] text-[#8178d9]">
+                      {trackingStats.sentCount || 0}
+                    </p>
+                    <p className="text-[14px] font-semibold text-[#666]">
+                      Tracking
+                    </p>
+                  </div>
+                </div>
+                <div className="flex h-[100px] w-[32.8%] items-center justify-center gap-6 rounded-[5px] bg-[#f4f7f9]">
+                  <div className="h-[60px] w-[60px] rounded-md bg-white p-2">
+                    <img
+                      width="48"
+                      height="48"
+                      src="https://img.icons8.com/pulsar-gradient/48/feedback.png"
+                      alt="feedback"
+                    />
+                  </div>
+                  <div className="box-border">
+                    <p className="mb-[3px] text-[32px] font-bold leading-[1] text-[#8cd622]">
+                      {trackingStats.openedCount || 0}
+                    </p>
+                    <p className="text-[14px] font-semibold text-[#666]">
+                      Opened
+                    </p>
+                  </div>
+                </div>
+                <div className="flex h-[100px] w-[32.8%] items-center justify-center gap-6 rounded-[5px] bg-[#f4f7f9]">
+                  <div className="h-[60px] w-[60px] rounded-md bg-white p-2">
+                    <img
+                      width="48"
+                      height="48"
+                      src="https://img.icons8.com/pulsar-gradient/48/envelope-number.png"
+                      alt="envelope-number"
+                    />
+                  </div>
+                  <div className="box-border">
+                    <p className="mb-[3px] text-[32px] font-bold leading-[1] text-[#f7d070]">
+                      {trackingStats.sentCount !== 0
+                        ? (
+                            trackingStats.unopenedCount /
+                            trackingStats.sentCount
+                          ).toFixed(2)
+                        : 0}
+                      %
+                      <span className="ms-[3px] text-[14px] font-semibold text-[#666]">
+                        ({trackingStats.unopenedCount || 0})
+                      </span>
+                    </p>
+                    <p className="text-[14px] font-semibold text-[#666]">
+                      Unread
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="rounded bg-white p-4 shadow">
-            <div className="text-sm text-gray-500">Tổng email đã mở</div>
-            <div className="text-2xl font-bold">85</div>
-          </div>
-          <div className="rounded bg-white p-4 shadow">
-            <div className="text-sm text-gray-500">Tỷ lệ mở</div>
-            <div className="text-2xl font-bold">56.7%</div>
-          </div>
-        </div>
-
-        {/* Biểu đồ */}
-        <div className="mb-8 rounded bg-white p-4 shadow">
-          <Chart
-            options={chartOptions}
-            series={chartSeries}
-            type="line"
-            height={300}
-          />
-        </div>
-
-        {/* Bảng chi tiết */}
-        <div className="rounded bg-white p-4 shadow">
-          <table className="w-full table-auto">
-            <thead>
-              <tr>
-                <th>Email</th>
-                <th>Thời gian gửi</th>
-                <th>Đã mở</th>
-                <th>Thời gian mở</th>
-                <th>Đã trả lời</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>user1@gmail.com</td>
-                <td>01/05/2024 09:00</td>
-                <td>Có</td>
-                <td>01/05/2024 09:10</td>
-                <td>Không</td>
-              </tr>
-              {/* ...dòng khác */}
-            </tbody>
-          </table>
         </div>
       </div>
     </DefaultLayout>

@@ -37,7 +37,7 @@ export class AuthService extends BaseService<UserEntity> {
     const { data: userInfo } = await oauth2.userinfo.get();
 
     return {
-      fullName: null,
+      fullName: userInfo.name,
       accessToken: tokens.access_token,
       expiryDate: tokens.expiry_date,
       idToken: tokens.id_token,
@@ -53,7 +53,7 @@ export class AuthService extends BaseService<UserEntity> {
   async checkAuthenticated(email: string): Promise<any> {
     try {
       const user = await this.userRepo.findOne({
-        where: { email },
+        where: { email: email, deletedAt: null },
       });
 
       if (!user) {
@@ -89,6 +89,7 @@ export class AuthService extends BaseService<UserEntity> {
       refreshTokenExpiresIn: new Date(tokenInfo.refreshTokenExpiresIn),
       scope: tokenInfo.scope,
       tokenType: tokenInfo.tokenType,
+      summaryLanguage: existEmail ? existEmail.summaryLanguage : 'vi',
     });
 
     await this.userRepo.upsert(userData, {
@@ -125,8 +126,17 @@ export class AuthService extends BaseService<UserEntity> {
 
     try {
       const oauth2 = google.oauth2({ version: 'v2', auth: this.oauth2Client });
+      // const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
+      // const { data: profile } = await gmail.users.getProfile({
+      //   userId: 'me',
+      // });
+
       const { data: userInfo } = await oauth2.userinfo.get();
-      return { ...userInfo, sessionId };
+      return {
+        ...userInfo,
+        sessionId,
+        summaryLanguage: session.summaryLanguage,
+      };
     } catch (error) {
       throw new UnauthorizedException(error);
     }
@@ -288,5 +298,20 @@ export class AuthService extends BaseService<UserEntity> {
       deletedAt: null,
     });
     return entity;
+  }
+
+  async updateByUserId(
+    userId: string,
+    data: Partial<UserEntity>,
+  ): Promise<UserEntity> {
+    const entity = await this.userRepo.findOneBy({
+      userId,
+      deletedAt: null,
+    });
+    if (!entity) {
+      throw new NotFoundException(MessageName.USER);
+    }
+    Object.assign(entity, data);
+    return this.userRepo.save(entity);
   }
 }

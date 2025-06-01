@@ -9,6 +9,14 @@ import UserMessage from "./UserMessage";
 
 export default function ReplyQuickPopup() {
     const [messages, setMessages] = useState([]);
+    const [currentThread, setCurrentThread] = useState(null);
+    const [threads, setThreads] = useState([
+        { title: "Thread 1", preview: "This is a preview of thread 1" },
+        { title: "Thread 2", preview: "This is a preview of thread 2" },
+        { title: "Thread 3", preview: "This is a preview of thread 3" }
+    ]);
+    const [isThreadsView, setIsThreadsView] = useState(true);
+
 
     useEffect(() => {
         async function loadWelcomeMessage() {
@@ -39,8 +47,14 @@ export default function ReplyQuickPopup() {
 
     return (
         <div className="chatbot rounded-xl bg-[#f5f8fb] text-center flex flex-col w-[400px] max-h-[500px] overflow-hidden">
-            <Header />
-            <Messages messages={messages} />
+            <Header onClick={() => setIsThreadsView(true)} />
+            {
+                isThreadsView ? (
+                    <ThreadListView threads={threads} />
+                ) : (
+                    <Messages messages={messages} />
+                )
+            }
             <Input onSend={handleSend} />
         </div>
     );
@@ -56,3 +70,28 @@ const API = {
         });
     }
 };
+
+function ThreadListView({ threads, onSelectThread }) {
+    return (
+        <div className="thread-list-view rounded-[3px] bg-white flex flex-col w-[400px] h-[500px] overflow-hidden shadow-md border border-gray-300">
+            <div className="flex-1 overflow-auto">
+                <ul className="divide-y divide-gray-200">
+                    {threads.length > 0 && (
+                        threads.map((thread, index) => (
+                            <li key={index}>
+                                <button
+                                    className="w-full text-left p-[12px_16px] hover:bg-[#f5f5f5] focus:outline-none"
+                                    onClick={() => onSelectThread(thread)}
+                                >
+                                    <div className="text-base font-medium text-[#005b9c] truncate">
+                                        {thread.title || `Thread ${index + 1}`}
+                                    </div>
+                                </button>
+                            </li>
+                        ))
+                    )}
+                </ul>
+            </div>
+        </div>
+    )
+}

@@ -1,7 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import ReplyQuickPopup from "./ReplyQuickPopup/ReplyQuickPopup";
-import SummaryPopup from "./SummaryPopup/SummaryPopup";
+import SummaryPopup, { SummaryButton } from "./SummaryPopup/SummaryPopup";
 import AppMenuPopup from "./AppMenuPopup/AppMenuPopup";
 import ChatbotPanel from "./ChatbotPanel/ChatbotPanel";
 import SelectLabels from "./SelectLabels/SelectLabels";
@@ -27,6 +27,13 @@ export function createSummaryPopup({ el, threadId, messageId, session }) {
     );
 }
 
+export function createSummaryButton({ el, threadId, messageId, session }) {
+    const root = getOrCreateRoot(el);
+    root.render(
+        <SummaryButton threadId={threadId} messageId={messageId} session={session} />
+    );
+}
+
 export function createAppMenuPopup({ el, email, session, }) {
     const root = getOrCreateRoot(el);
     root.render(
@@ -37,7 +44,7 @@ export function createAppMenuPopup({ el, email, session, }) {
 export function createChatbotPanel({ el, session }) {
     const root = getOrCreateRoot(el);
     root.render(
-        <ChatbotPanel session={session} />
+        <ChatbotPanel session={session} el={el} />
     )
 }
 
