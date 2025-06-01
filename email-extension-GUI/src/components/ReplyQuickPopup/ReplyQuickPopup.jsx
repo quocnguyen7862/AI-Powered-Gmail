@@ -154,7 +154,7 @@ export default function ReplyQuickPopup({ threadId, draftId, composeView, sessio
 
 export const Header = ({ title, children }) => {
     return (
-        <div className="flex bg-[#005b9c] p-1" style={{ position: "sticky", top: 0, zIndex: 1000 }}>
+        <div className="flex bg-[#373b67] p-1" style={{ position: "sticky", top: 0, zIndex: 1000 }}>
             <p className="header w-full flex-1 text-center max-h-[58px] text-base font-bold text-white" >
                 &nbsp;{title}
             </p>

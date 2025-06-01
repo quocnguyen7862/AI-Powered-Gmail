@@ -6,4 +6,5 @@ export class CreateSummarizeDto {
   userId: string;
   sentAt: Date;
   threadId: string;
+  language: string;
 }

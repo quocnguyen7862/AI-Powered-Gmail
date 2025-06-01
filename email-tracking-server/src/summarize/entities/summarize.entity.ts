@@ -16,6 +16,8 @@ export class SummarizeEntity {
   subject: string;
   @Prop()
   summary: string;
+  @Prop()
+  language: string;
 }
 
 export const SummarizeSchema = SchemaFactory.createForClass(SummarizeEntity);

@@ -52,16 +52,21 @@ const MangeSummaries = () => {
   }, []);
 
   const reSummarize = useCallback(
-    async (messageId: string, threadId: string) => {
+    async (messageId: string, threadId: string, language?: string) => {
       setLoading(true);
       try {
         const response = await Api.post(URL_RE_SUMMARIZE, {
           messageId: messageId,
           threadId: threadId,
+          language: language,
         });
         const data = response.data;
         console.log("🚀 ~ selectedMessage:", selectedMessage);
-        setSelectedMessage((prev: any) => ({ ...prev, summary: data.summary }));
+        setSelectedMessage((prev: any) => ({
+          ...prev,
+          summary: data.summary,
+          language: data.language,
+        }));
       } catch (error) {
         message.error("Error re-summarizing message");
       }
@@ -247,7 +252,43 @@ const MangeSummaries = () => {
               title={`Summary of ${selectedMessage?.subject}`}
               open={open}
               okButtonProps={{ className: "!bg-red-600 !hover:bg-opacity-90" }}
-              footer={[
+              footer={[]}
+              onCancel={() => setOpen(false)}
+            >
+              <div className="max-h-100 overflow-auto">
+                {loading ? (
+                  <Skeleton active={loading} />
+                ) : (
+                  <MarkdownPreview markdown={selectedMessage?.summary} />
+                )}
+              </div>
+              <div className="mt-4 flex items-center justify-between">
+                <select
+                  disabled={loading}
+                  className={
+                    "font-google relative z-20 appearance-none rounded border border-stroke bg-transparent px-3 py-1 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary "
+                  }
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                    reSummarize(
+                      selectedMessage?.messageId,
+                      selectedMessage?.threadId,
+                      e.target.value,
+                    );
+                  }}
+                  value={selectedMessage?.language}
+                >
+                  {languages.map((item, index) => {
+                    return (
+                      <option
+                        key={index}
+                        value={item.value}
+                        className="text-body dark:text-bodydark"
+                      >
+                        {item.name}
+                      </option>
+                    );
+                  })}
+                </select>
                 <button
                   onClick={() => {
                     reSummarize(
@@ -263,16 +304,7 @@ const MangeSummaries = () => {
                     alt="rotate-left"
                     className={`${loading ? "animate-spin" : ""}`}
                   />
-                </button>,
-              ]}
-              onCancel={() => setOpen(false)}
-            >
-              <div className="max-h-100 overflow-auto">
-                {loading ? (
-                  <Skeleton active={loading} />
-                ) : (
-                  <MarkdownPreview markdown={selectedMessage?.summary} />
-                )}
+                </button>
               </div>
             </Modal>
           </div>

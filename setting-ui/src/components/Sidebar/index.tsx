@@ -85,8 +85,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               />
             </svg>
           ),
-          label: "Manage Models",
-          route: "/",
+          label: "Email Tracking",
+          route: "/email-tracking",
         },
         {
           icon: (
@@ -116,8 +116,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               />
             </svg>
           ),
-          label: "Email Tracking",
-          route: "/email-tracking",
+          label: "Manage Models",
+          route: "/manage-models",
         },
         {
           icon: (
@@ -252,15 +252,21 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   return (
     <ClickOutside onClick={() => setSidebarOpen(false)}>
       <aside
-        className={`fixed left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-[#005b9c] duration-300 ease-linear dark:bg-boxdark lg:translate-x-0 ${
+        className={`fixed left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-[#373b67] duration-300 ease-linear dark:bg-boxdark lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* <!-- SIDEBAR HEADER --> */}
         <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
-          <Link href="/">
+          <Link href="/email-tracking" className="flex items-center gap-2">
             {/* <Image width={176} height={32} src={""} alt="Logo" priority /> */}
-            <h1 className="text-2xl font-bold text-white">AI-Powered Gmail</h1>
+            <img
+              width="50"
+              height="50"
+              src="https://img.icons8.com/pulsar-color/50/owl.png"
+              alt="owl"
+            />
+            <div className="text-2xl font-bold text-white">MAILWISE</div>
           </Link>
 
           <button

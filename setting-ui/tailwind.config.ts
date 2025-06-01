@@ -20,6 +20,7 @@ const config: Config = {
         "Arial",
         "sans-serif",
       ],
+      montserrat: ["Montserrat", "sans-serif"],
     },
     screens: {
       "2xsm": "375px",

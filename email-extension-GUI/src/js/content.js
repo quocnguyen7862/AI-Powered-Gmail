@@ -268,7 +268,8 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
   });
 
   sdk.Toolbars.addToolbarButtonForApp({
-    title: 'AI Powered Gmail',
+    iconUrl: "https://img.icons8.com/pulsar-color/48/owl.png",
+    iconClass: '!w-[32px] !h-[32px] p-[6px] mt-[10px] ml-[-5px] rounded-[50%] hover:bg-white hover:shadow-lg',
     onClick: async ({ dropdown }) => {
       const email = sdk.User.getEmailAddress();
       createAppMenuPopup({ el: dropdown.el, email: email, session: session });

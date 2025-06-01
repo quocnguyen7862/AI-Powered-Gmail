@@ -14,7 +14,7 @@ import { signIn } from "next-auth/react";
 
 const SignIn: React.FC = () => {
   const onClick = () => {
-    return signIn("google", { callbackUrl: "/" });
+    return signIn("google", { callbackUrl: "/email-tracking" });
   };
 
   return (

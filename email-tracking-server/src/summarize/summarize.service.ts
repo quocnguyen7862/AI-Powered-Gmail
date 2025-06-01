@@ -93,6 +93,10 @@ export class SummarizeService {
 
       const model = await this.modelService.getSelectedByUserId(user.id);
 
+      const language = emailData.language
+        ? emailData.language
+        : user.summaryLanguage;
+
       const response = await axios.post(
         MODEL_URL + 'summarize-email',
         {
@@ -104,7 +108,7 @@ export class SummarizeService {
           api_key_type: model.apiKeyType,
           user_id: user.id,
           user_name: user.name,
-          language: user.summaryLanguage,
+          language: language,
         },
         {
           headers: {
@@ -125,9 +129,10 @@ export class SummarizeService {
           (header) => header.name === 'From',
         ).value,
         threadId: emailData.threadId,
+        language: language,
       });
 
-      return response.data;
+      return { ...response.data, language: language };
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
@@ -203,6 +208,7 @@ export class SummarizeService {
       {
         threadId: emailData.threadId,
         messageId: emailData.messageId,
+        language: emailData.language,
       },
       user,
     );

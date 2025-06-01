@@ -32,5 +32,9 @@
         "resources": ["*.map"],
         "matches": ["https://mail.google.com/*"]
       }
-    ]
+    ],
+    "icons":{
+      "16": "icons8-owl-16.png",
+      "48": "icons8-owl-48.png"
+    }
 }

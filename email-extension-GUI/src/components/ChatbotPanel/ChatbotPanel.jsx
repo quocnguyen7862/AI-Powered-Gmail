@@ -170,7 +170,7 @@ function ThreadListView({ threads, onSelectThread, fetchThreadsHistory, session 
                                         className="w-full text-left focus:outline-none"
                                         onClick={() => onSelectThread(thread.key)}
                                     >
-                                        <div className="text-base font-medium text-[#005b9c] truncate">
+                                        <div className="text-base font-medium text-[#373b67] truncate">
                                             {thread.value || `Thread ${index + 1}`}
                                         </div>
                                     </button>
