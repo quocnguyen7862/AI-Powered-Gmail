@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from .requests.chatbot_request import ChatbotRequest
-from services.chatbot import create_agent_graph
+from app.apis.requests.chatbot_request import ChatbotRequest
+from app.services.chatbot import create_agent_graph
 from app.helpers.chatbot_state import ChatbotState
 from langchain_core.messages import HumanMessage, AIMessage, AIMessageChunk,SystemMessage
 from langchain_community.tools.gmail.utils import get_gmail_credentials

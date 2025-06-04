@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from .requests.reply_request import ReplyRequest
-from services.reply_chatbot import create_agent_graph
+from app.apis.requests.reply_request import ReplyRequest
+from app.services.reply_chatbot import create_agent_graph
 from app.helpers.reply_state import ReplyState
 from langchain_core.messages.human import HumanMessage
 from langchain_core.runnables import RunnableConfig

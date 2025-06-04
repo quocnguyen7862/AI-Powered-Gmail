@@ -1,0 +1,56 @@
+name: Deploy AI to VM Docker
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Docker Images
+        run: |
+          docker build -t siuit/email-ai-server:${{ github.sha }} -t siuit/email-ai-server:latest -f email-ai-server/Dockerfile email-ai-server
+          docker push siuit/email-ai-server:${{ github.sha }}
+          docker push siuit/email-ai-server:latest
+
+  deploy:
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+    needs: build
+    environment: production
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            sudo docker ps -a
+
+            sudo docker stop email-ai-server || true
+            sudo docker rm -f email-ai-server || true
+
+            sudo docker pull siuit/email-ai-server:latest
+            sudo docker run -d -p 8000:8000 --restart unless-stopped --name email-ai-server \
+              -e "REDIS_URL=${{secrets.REDIS_URL}}" \
+              siuit/email-ai-server:latest
+            sudo docker image prune -f

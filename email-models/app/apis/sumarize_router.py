@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from services.bart_service import BartSummarizationService
-from .requests.email_request import EmailRequest
-from services.summarizers.langgraph_summarize_email import create_agent_graph, EmailState
+from app.apis.requests.email_request import EmailRequest
+from app.services.summarizers.langgraph_summarize_email import create_agent_graph, EmailState
 import base64
 
 summarize_router = APIRouter(prefix="/summarize-email", tags=["summarize"])

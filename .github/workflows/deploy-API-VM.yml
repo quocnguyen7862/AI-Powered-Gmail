@@ -1,4 +1,4 @@
-name: Deploy to VM Docker
+name: Deploy API to VM Docker
 
 on:
   push:

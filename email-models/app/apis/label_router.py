@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
-from services.label_classifier.label_classifer_agent import LabelClassifierAgent
-from .requests.label_request import LabelRequest
-from .requests.email_request import EmailRequest
+from app.services.label_classifier.label_classifer_agent import LabelClassifierAgent
+from app.apis.requests.label_request import LabelRequest
+from app.apis.requests.email_request import EmailRequest
 
 label_router = APIRouter(prefix="/label", tags=["label"])
 label_classifier_agent = LabelClassifierAgent()

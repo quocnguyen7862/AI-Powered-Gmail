@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException
-from .requests.scenario_request import ScenarioRequest
+from app.apis.requests.scenario_request import ScenarioRequest
 from app.services.reply_scenarios.reply_scenarios_agent import ReplyScenariosAgent
-from services.reply_scenarios import create_agent_graph
-from helpers.scenario_state import ScenarioState
+from app.services.reply_scenarios import create_agent_graph
+from app.helpers.scenario_state import ScenarioState
 
 scenario_router = APIRouter(prefix="/reply-scenarios", tags=["reply_scenario"])
 

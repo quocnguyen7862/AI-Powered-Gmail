@@ -1,15 +1,13 @@
 import os
 from langgraph.graph import StateGraph, END,START
 from langchain.chat_models import init_chat_model
-from app.helpers.reply_state import ReplyState
 from langgraph.prebuilt import ToolNode
-from helpers.mongodb_tool import get_email_summary
-from services.reply_chatbot.generate_reply_agent import GenerateReplyAgent
 from langgraph.checkpoint.redis import RedisSaver
 from langgraph.store.redis import RedisStore
-from services.summarizers.summarize_attachs_agent import SummarizeAttachmentsAgent
-
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
+from app.helpers.reply_state import ReplyState
+from app.services.reply_chatbot.generate_reply_agent import GenerateReplyAgent
+from app.services.summarizers.summarize_attachs_agent import SummarizeAttachmentsAgent
+from app.helpers.redis_memory import REDIS_URL
 
 with (RedisStore.from_conn_string(REDIS_URL) as store,
       RedisSaver.from_conn_string(REDIS_URL) as checkpointer):
@@ -20,7 +18,6 @@ with (RedisStore.from_conn_string(REDIS_URL) as store,
         # Initialize agents
         os.environ[api_key_type] = api_key
         llm = init_chat_model(model_name)
-        llm_with_tool = llm.bind_tools([get_email_summary])
 
         generate_reply = GenerateReplyAgent(llm)
         summarize_attachments = SummarizeAttachmentsAgent(llm)

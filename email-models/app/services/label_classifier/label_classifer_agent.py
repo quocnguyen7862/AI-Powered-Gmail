@@ -1,10 +1,10 @@
 from langchain.embeddings import OpenAIEmbeddings
-from qdrant_client import QdrantClient
 from langchain.vectorstores import Qdrant
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from qdrant_client import QdrantClient
 from qdrant_client.http.models import VectorParams, Distance
-from services.summarizers.langgraph_summarize_email import create_agent_graph, EmailState
-from apis.requests.email_request import EmailRequest
+from app.services.summarizers.langgraph_summarize_email import create_agent_graph, EmailState
+from app.apis.requests.email_request import EmailRequest
 import os
 import base64
 

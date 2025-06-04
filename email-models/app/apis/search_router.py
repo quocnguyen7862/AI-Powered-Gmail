@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from .requests.chatbot_request import ChatbotRequest
-from services.search import create_agent_graph
+from app.apis.requests.chatbot_request import ChatbotRequest
+from app.services.search import create_agent_graph
 from app.helpers.search_state import SearchState
 from langchain_core.messages.human import HumanMessage
 from langchain_community.tools.gmail.utils import get_gmail_credentials

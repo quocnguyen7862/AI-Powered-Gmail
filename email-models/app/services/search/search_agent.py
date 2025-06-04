@@ -1,8 +1,8 @@
 from langgraph.prebuilt import create_react_agent
-from helpers.search_state import SearchState
 from langchain_core.messages import ToolMessage,AIMessage,SystemMessage
 import pprint
 import json
+from app.helpers.search_state import SearchState
 
 system_msg = f"""
 You are a helpful assistant with access to Gmail.

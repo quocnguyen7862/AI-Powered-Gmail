@@ -15,7 +15,7 @@ $ 4. fastapi run main.py
 $ 1. python -m venv .venv
 $ 2. .venv\Scripts\activate
 $ 3. pip install -r requirements.txt
-$ 4. fastapi dev main.py
+$ 4. fastapi dev main.py || uvicorn app.main:get_application
 ```
 
 # Debug
