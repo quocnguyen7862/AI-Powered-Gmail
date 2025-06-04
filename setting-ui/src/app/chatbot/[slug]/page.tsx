@@ -3,10 +3,9 @@ import Api from "@/axios.config";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import { URL_CHAT_HISTORY, URL_CHATBOT } from "@/constants/endpoints";
+import { MarkdownPreview } from "@/constants/markdown";
 import { Divider } from "antd";
-import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Remarkable } from "remarkable"; // Markdown parser
 
 const Thread = ({ params }: { params: { slug: string } }) => {
   const [messages, setMessages] = useState<React.ReactNode[]>([]);
@@ -138,7 +137,7 @@ type MessagesProps = {
   className?: string;
 };
 
-export const Messages: React.FC<MessagesProps> = ({ messages, className }) => {
+const Messages: React.FC<MessagesProps> = ({ messages, className }) => {
   return (
     <div
       className={`${className ? className : ""} messages flex w-full flex-col overflow-auto p-[10px_0]`}
@@ -152,7 +151,7 @@ type InputProps = {
   onSend: (text: string) => void;
 };
 
-export const Input: React.FC<InputProps> = ({ onSend }) => {
+const Input: React.FC<InputProps> = ({ onSend }) => {
   const [text, setText] = React.useState("");
 
   const handleInputChange = (e: any) => {
@@ -206,7 +205,7 @@ type BotMessageProps = {
   preMesssage?: string;
 };
 
-export const BotMessage: React.FC<BotMessageProps> = ({
+const BotMessage: React.FC<BotMessageProps> = ({
   fetchMessage,
   preMesssage,
 }) => {
@@ -257,24 +256,7 @@ export const BotMessage: React.FC<BotMessageProps> = ({
   );
 };
 
-interface RenderMarkdownToHTMLResult {
-  __html: string;
-}
-
-const renderMarkdownToHTML = (markdown: string): RenderMarkdownToHTMLResult => {
-  const md = new Remarkable();
-  const renderedHTML = md.render(markdown);
-  return { __html: renderedHTML };
-};
-
-export const MarkdownPreview: React.FC<{ markdown: string }> = ({
-  markdown,
-}) => {
-  const markup = renderMarkdownToHTML(markdown);
-  return <div dangerouslySetInnerHTML={markup} />;
-};
-
-export const UserMessage: React.FC<{ text: string }> = ({ text }) => {
+const UserMessage: React.FC<{ text: string }> = ({ text }) => {
   return (
     <div className="message-container w-full">
       <div className="font-google user-message float-right m-3 rounded-[20px_20px_1px_20px] bg-[#cccccc] p-[15px_10px] text-justify text-black">

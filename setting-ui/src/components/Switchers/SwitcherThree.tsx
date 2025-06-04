@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
 type SwitcherThreeProps = {
-  onChange: () => Promise<boolean>;
-  checked: boolean;
+  onChange?: () => Promise<boolean>;
+  checked?: boolean;
 };
 
 const SwitcherThree = ({ onChange, checked }: SwitcherThreeProps) => {

@@ -7,11 +7,11 @@ import {
   URL_SUMMARIZE,
   URL_SUMMARIZE_LANGUAGE,
 } from "@/constants/endpoints";
+import { MarkdownPreview } from "@/constants/markdown";
 import { Button, message, Modal, Pagination, Skeleton } from "antd";
 import { useSession } from "next-auth/react";
 import React, { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { MarkdownPreview } from "../chatbot/[slug]/page";
 
 const languages = [
   { name: "Tiếng Việt", value: "vi" },
