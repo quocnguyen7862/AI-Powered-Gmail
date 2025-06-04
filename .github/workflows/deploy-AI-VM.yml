@@ -25,7 +25,7 @@ jobs:
 
       - name: Build and Push Docker Images
         run: |
-          docker build -t siuit/email-ai-server:${{ github.sha }} -t siuit/email-ai-server:latest -f email-ai-server/Dockerfile email-ai-server
+          docker build -t siuit/email-ai-server:${{ github.sha }} -t siuit/email-ai-server:latest -f email-models/Dockerfile email-ai-server
           docker push siuit/email-ai-server:${{ github.sha }}
           docker push siuit/email-ai-server:latest
 
