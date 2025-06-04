@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Card, Button, Space, Typography, Divider, message } from "antd";
+import { Card, Button, Space, Typography, Divider, message, Tag } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import Api from "../../js/axios.config";
 import { URL_SUMMARIZE_BY_DRAFT, URL_REPLY_GENERATE, URL_REPLY_SCENARIO, URL_CHAT_HISTORY } from "../../js/config";
@@ -96,7 +96,7 @@ export default function ReplyQuickPopup({ threadId, draftId, composeView, sessio
     }, [threadId, draftId]);
 
     useEffect(() => {
-        if (!!messageId && messages.length === 0) {
+        if (!!messageId && messages.length === 1) {
             fetchScenarios(messageId).then((data) => {
                 setScenarios([...data.output.map((item) => ({ ...item, messageId: data.messageId }))]);
             })
@@ -185,7 +185,7 @@ export const Messages = ({ messages, loadMoreMessages, className }) => {
     )
 }
 
-export const Input = ({ onSend, scenarios, handleScenarioClick }) => {
+export const Input = ({ onSend, scenarios, handleScenarioClick, thread, hide, setHide }) => {
     const [text, setText] = React.useState('');
 
     const handleInputChange = (e) => {
@@ -209,6 +209,33 @@ export const Input = ({ onSend, scenarios, handleScenarioClick }) => {
                     ))}
                 </ul>
             )}
+            {
+                thread && (
+                    <ul className="divide-y divide-slate-200">
+                        <li className='first:pt-0 last:pb-0 flex flex-col'>
+                            <Tag
+                                closeIcon={
+                                    <span>
+                                        {
+                                            hide ?
+                                                <img width="12" height="12" src="https://img.icons8.com/pulsar-line/12/closed-eye.png" alt="closed-eye" />
+                                                :
+                                                <img width="12" height="12" src="https://img.icons8.com/pulsar-line/12/visible.png" alt="visible" />
+                                        }
+                                    </span>
+                                }
+                                onClose={(e) => {
+                                    e.preventDefault();
+                                    setHide(!hide);
+                                }}
+                                className="!text-wrap !mx-4 !mt-2 !flex !flex-row !items-center"
+                            >
+                                {thread?.subject}
+                            </Tag>
+                        </li>
+                    </ul>
+                )
+            }
             <div className='relative m-[8px_16px_16px_16px]'>
                 <form onSubmit={handleSend}>
                     <input

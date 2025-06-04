@@ -5,9 +5,9 @@ from services.search.search_agent import SearchAgent
 from helpers.search_state import SearchState
 from langchain_community.agent_toolkits.gmail.toolkit import GmailToolkit
 from langchain_community.tools.gmail.utils import build_resource_service
-from langchain_community.tools.gmail.search import GmailSearch
 from langchain_community.tools.gmail.get_message import GmailGetMessage
 from langchain_community.tools.gmail.get_thread import GmailGetThread
+from helpers.gmail_search import GmailSearch
 
 def create_agent_graph(gmail_creds,model_name: str = 'gpt-4o-mini', api_key_type='OPENAI_API_KEY', api_key: str = '') -> StateGraph:
     # Gmail API credentials

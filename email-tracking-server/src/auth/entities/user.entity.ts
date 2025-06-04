@@ -43,6 +43,9 @@ export class UserEntity extends BaseEntity {
   @Column({ nullable: true })
   summaryLanguage: string;
 
+  @Column({ default: true })
+  enabledTracking: boolean;
+
   @OneToMany(() => TrackingEntity, (trackingEntity) => trackingEntity.user)
   trackings: TrackingEntity[];
 

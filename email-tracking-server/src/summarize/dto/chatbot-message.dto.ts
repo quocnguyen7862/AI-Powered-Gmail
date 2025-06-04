@@ -11,4 +11,9 @@ export class ChatbotDto {
   @IsOptional()
   @ApiProperty()
   threadId?: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  emailId?: string;
 }

@@ -341,6 +341,7 @@ export class SummarizeService {
         api_key_type: model.apiKeyType,
         user_name: user.name,
         thread_id: message.threadId,
+        email_id: message.emailId,
       };
 
       const response = await axios.post(MODEL_URL + 'chatbot', requestBody, {

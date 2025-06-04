@@ -8,6 +8,7 @@ import { TrackingEntity } from './entities/tracking.entity';
 import { ReadedEntity } from './entities/readed.entity';
 import { TrackingRepository } from './repositories/tracking.repository';
 import { ReadedRepository } from './repositories/readed.repository';
+import { TrackingGateway } from '@/gateway/tracking.gateway';
 
 @Module({
   imports: [
@@ -16,6 +17,11 @@ import { ReadedRepository } from './repositories/readed.repository';
     CustomLoggerModule,
   ],
   controllers: [TrackingController],
-  providers: [TrackingService, TrackingRepository, ReadedRepository],
+  providers: [
+    TrackingService,
+    TrackingRepository,
+    ReadedRepository,
+    TrackingGateway,
+  ],
 })
 export class TrackingModule {}

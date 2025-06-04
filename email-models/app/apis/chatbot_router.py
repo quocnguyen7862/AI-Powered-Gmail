@@ -40,7 +40,8 @@ async def chatbot(request: ChatbotRequest):
         )
 
         state = ChatbotState(
-            messages=[HumanMessage(request.message)],
+            messages=[HumanMessage(content=f"Id of thread email: {request.email_id}\n\n"
+                                   f"User request: \n{request.message}")],
             user_name=request.user_name or "Không có tên người dùng",
         )
 

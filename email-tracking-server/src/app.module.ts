@@ -9,6 +9,7 @@ import { SummarizeModule } from './summarize/summarize.module';
 import { AuthModule } from './auth/auth.module';
 import { ModelModule } from './model/model.module';
 import { LabelModule } from './label/label.module';
+import { TrackingGateway } from './gateway/tracking.gateway';
 
 @Module({
   imports: [
@@ -24,6 +25,6 @@ import { LabelModule } from './label/label.module';
     LabelModule,
   ],
   controllers: [AppController],
-  providers: [AppService, AuthService],
+  providers: [AppService, AuthService, TrackingGateway],
 })
 export class AppModule {}

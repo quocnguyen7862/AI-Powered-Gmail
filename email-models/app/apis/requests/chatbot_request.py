@@ -12,3 +12,4 @@ class ChatbotRequest(ModelRequest):
     client_id: str
     client_secret: str
     thread_id: Optional[str] = None
+    email_id: Optional[str] = None

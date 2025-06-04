@@ -5,11 +5,12 @@ import { URL_CHAT_HISTORY, URL_CHATBOT, URL_THREADS_HISTORY } from '../../js/con
 import Api from '../../js/axios.config';
 import { v4 as uuidv4 } from 'uuid';
 
-const ChatbotPanel = ({ session, el }) => {
+const ChatbotPanel = ({ session, el, thread }) => {
     const [messages, setMessages] = useState([]);
     const [nextPage, setNextPage] = useState(null);
     const [currentThreadId, setCurrentThreadId] = useState(null);
     const [threads, setThreads] = useState([]);
+    const [hide, setHide] = useState(false);
 
     const handleSend = async (text) => {
         let threadId = currentThreadId;
@@ -17,6 +18,7 @@ const ChatbotPanel = ({ session, el }) => {
             threadId = uuidv4();
             setCurrentThreadId(threadId);
         }
+        let emailId = hide ? null : thread?.id;
 
         const newMessages = messages.concat(
             <div key={messages.length + 1}>
@@ -24,7 +26,7 @@ const ChatbotPanel = ({ session, el }) => {
                 <UserMessage text={text} />
                 <BotMessage fetchMessage={async () => {
                     try {
-                        const response = await Api.post(URL_CHATBOT, { message: text, threadId: threadId }, {}, session?.accessToken)
+                        const response = await Api.post(URL_CHATBOT, { message: text, threadId: threadId, emailId: emailId }, {}, session?.accessToken)
                         const data = response.data;
                         return data.output;
                     } catch (error) {
@@ -97,6 +99,10 @@ const ChatbotPanel = ({ session, el }) => {
         fetchThreadsHistory();
     }, [])
 
+    useEffect(() => {
+
+    }, [thread]);
+
     const onTogleHistory = () => {
         setCurrentThreadId(null);
         fetchThreadsHistory();
@@ -122,7 +128,7 @@ const ChatbotPanel = ({ session, el }) => {
                     <ThreadListView threads={threads} onSelectThread={onSelectThread} fetchThreadsHistory={fetchThreadsHistory} session={session} />
                 )
             }
-            <Input onSend={handleSend} />
+            <Input onSend={handleSend} thread={thread} hide={hide} setHide={setHide} />
         </div>
     )
 }
@@ -167,7 +173,7 @@ function ThreadListView({ threads, onSelectThread, fetchThreadsHistory, session 
                             <li key={index}>
                                 <div className='flex gap-2 justify-between hover:bg-[#f5f5f5] p-[12px_16px]'>
                                     <button
-                                        className="w-full text-left focus:outline-none"
+                                        className="w-[90%] text-left focus:outline-none"
                                         onClick={() => onSelectThread(thread.key)}
                                     >
                                         <div className="text-base font-medium text-[#373b67] truncate">

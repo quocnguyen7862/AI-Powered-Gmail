@@ -9,6 +9,7 @@ import { CreateTrackingDto } from './dto/create-tracking.dto';
 import { TrackingRepository } from './repositories/tracking.repository';
 import { ReadedRepository } from './repositories/readed.repository';
 import { Between } from 'typeorm';
+import { TrackingGateway } from '@/gateway/tracking.gateway';
 
 @Injectable()
 export class TrackingService extends BaseService<TrackingEntity> {
@@ -17,11 +18,12 @@ export class TrackingService extends BaseService<TrackingEntity> {
     private readonly readedRepository: ReadedRepository,
     private readonly logger: CustomLoggerService,
     private readonly authService: AuthService,
+    private readonly trackingGateway: TrackingGateway,
   ) {
     super(MessageName.TRACKING, trackingRepository);
   }
 
-  async saveSentEmail(dto: CreateTrackingDto): Promise<void> {
+  async saveSentEmail(dto: CreateTrackingDto): Promise<any> {
     const user = await this.authService.getUserInfo();
     const tracking = this.trackingRepository.create({
       messageId: dto.messageId,
@@ -31,7 +33,7 @@ export class TrackingService extends BaseService<TrackingEntity> {
       isSent: true,
     });
 
-    await this.trackingRepository.save(tracking);
+    return await this.trackingRepository.save(tracking);
   }
 
   async getSentEmailStatus(threadId: string): Promise<any> {
@@ -64,6 +66,7 @@ export class TrackingService extends BaseService<TrackingEntity> {
         isRead: true,
       });
       await this.readedRepository.save(readed);
+      this.trackingGateway.notifyEmailRead(email.userId, email.threadId);
     }
   }
 

@@ -41,10 +41,10 @@ export function createAppMenuPopup({ el, email, session, }) {
     )
 }
 
-export function createChatbotPanel({ el, session }) {
+export function createChatbotPanel({ el, session, thread }) {
     const root = getOrCreateRoot(el);
     root.render(
-        <ChatbotPanel session={session} el={el} />
+        <ChatbotPanel session={session} el={el} thread={thread} />
     )
 }
 

@@ -11,8 +11,8 @@ export class TrackingController {
 
   @Post('save-sent')
   async saveSentEmail(@Body() dto: CreateTrackingDto) {
-    await this.trackingService.saveSentEmail(dto);
-    return 'Email saved';
+    const data = await this.trackingService.saveSentEmail(dto);
+    return data;
   }
 
   @Get('status/:threadId')

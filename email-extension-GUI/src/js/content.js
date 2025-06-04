@@ -4,6 +4,7 @@ import { URL_AUTH_CHECK, URL_CHAT_HISTORY, URL_SAVE_SENT_EMAIL, URL_SEARCH, URL_
 import { ThreadStatus } from './enum';
 import { getSummaryModelHtml } from '../templates/summary-modal';
 import { createAppMenuPopup, createChatbotPanel, createReplyQuickPopup, createSelectLabels, createSummaryButton, createSummaryPopup } from '../components';
+import { Bus } from 'baconjs'
 
 InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
   async function checkLogin(email) {
@@ -31,46 +32,6 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
     session = res;
 
     if (res.isSignedIn) {
-      sdk.Compose.registerComposeViewHandler((composeView) => {
-        let to = [];
-        let trackingId = Date.now().toString();
-        composeView.on('presending', (event) => {
-          const currentBody = composeView.getHTMLContent();
-          trackingId = Date.now().toString();
-          const trackingPixel = `<img src="https://367b-116-105-161-175.ngrok-free.app/api/tracking/track/${trackingId}.gif" width="1" height="1" style="display:none" />`;
-          composeView.setBodyHTML(currentBody + trackingPixel);
-
-          to = composeView.getToRecipients().map((recipient) => recipient.emailAddress);
-        })
-
-        composeView.on('sent', async (event) => {
-          try {
-            const messsageId = await event.getMessageID();
-            const threadId = await event.getThreadID();
-
-            const response = await Api.postApiNonAuth(URL_SAVE_SENT_EMAIL, {
-              messageId: messsageId,
-              threadId: threadId,
-              trackingId: trackingId,
-              receiverAddress: to,
-            })
-          }
-          catch (error) {
-            console.log("🚀 ~ error:", error)
-          }
-        });
-
-        composeView.on("destroy", async (event) => {
-          try {
-            const draftId = await composeView.getDraftID();
-            await Api.delete(URL_CHAT_HISTORY + `/${draftId}`, {}, session?.accessToken);
-          }
-          catch (error) {
-            console.log("🚀 ~ error:", error)
-          }
-        })
-      })
-
       // sdk.Toolbars.registerThreadButton({
       //   title: 'AI Label',
       //   iconUrl: 'https://img.icons8.com/material-outlined/48/sparkling.png',
@@ -173,6 +134,27 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
         const pixel = `<img src="" width="1" height="1" style="display:none" />`;
         composeView.setBodyHTML(currentBody + pixel);
 
+        let trackingEnabled = true;
+        let enableTrackingIcon = 'https://img.icons8.com/pulsar-color/48/appointment-reminders.png'
+        let disableTrackingIcon = 'https://img.icons8.com/pulsar-color/48/no-reminders.png';
+
+        const trackingBus = new Bus();
+
+        // Tạo button với Bacon stream
+        const trackingButton = composeView.addButton(
+          trackingBus
+            .scan(trackingEnabled, (prev) => !prev) // Đảo trạng thái mỗi lần click
+            .map((enabled) => ({
+              title: enabled ? 'Disable tracking for this email' : 'Enable tracking for this email',
+              iconUrl: enabled ? enableTrackingIcon : disableTrackingIcon,
+              iconClass: 'm-[-4px] w-[20px] h-[20px]',
+              onClick: () => {
+                trackingBus.push(); // Phát sự kiện để đổi trạng thái
+                trackingEnabled = !trackingEnabled; // Cập nhật biến trạng thái nếu cần dùng ở nơi khác
+              }
+            }))
+        );
+
         if (isReply) {
           // expandQuotedContentInCompose();
           threadId = composeView.getThreadID();
@@ -196,10 +178,46 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
             console.log("🚀 ~ error:", error)
           }
         })
+
+        let to = [];
+        let trackingId = Date.now().toString();
+        composeView.on('presending', (event) => {
+          if (!trackingEnabled) {
+            return;
+          }
+          const currentBody = composeView.getHTMLContent();
+          trackingId = Date.now().toString();
+          const trackingPixel = `<img src="https://367b-116-105-161-175.ngrok-free.app/api/tracking/track/${trackingId}.gif" width="1" height="1" style="display:none" />`;
+          composeView.setBodyHTML(currentBody + trackingPixel);
+
+          to = composeView.getToRecipients().map((recipient) => recipient.emailAddress);
+        })
+
+        composeView.on('sent', async (event) => {
+          try {
+            if (!trackingEnabled) {
+              return;
+            }
+            const messsageId = await event.getMessageID();
+            const threadId = await event.getThreadID();
+
+            const response = await Api.post(URL_SAVE_SENT_EMAIL, {
+              messageId: messsageId,
+              threadId: threadId,
+              trackingId: trackingId,
+              receiverAddress: to,
+            })
+          }
+          catch (error) {
+            console.log("🚀 ~ error:", error)
+          }
+        });
       })
 
       const chatbotPanelEl = document.createElement('div');
       chatbotPanelEl.className = 'h-full';
+      let chatbotPanel = null;
+      let currentThread = null;
       sdk.Global.addSidebarContentPanel(
         {
           title: 'AI Assistant',
@@ -207,10 +225,37 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
           el: chatbotPanelEl,
         }
       ).then((panel) => {
+        if (!chatbotPanel)
+          chatbotPanel = panel;
         panel.close();
         panel.on('activate', () => {
-          createChatbotPanel({ el: chatbotPanelEl, session: session })
+          createChatbotPanel({ el: chatbotPanelEl, session: session, thread: currentThread })
         });
+      })
+
+      sdk.Conversations.registerThreadViewHandler(async (threadView) => {
+
+        const threadId = await threadView.getThreadIDAsync();
+        currentThread = {
+          id: threadId,
+          subject: threadView.getSubject(),
+        }
+
+        if (!!chatbotPanel && chatbotPanel.isActive()) {
+          chatbotPanel.close();
+          chatbotPanel.open();
+        }
+      })
+
+      sdk.Router.handleAllRoutes((routeView) => {
+        const routeId = routeView.getRouteID();
+        if (routeId !== sdk.Router.NativeRouteIDs.THREAD) {
+          currentThread = undefined;
+          if (!!chatbotPanel && chatbotPanel.isActive()) {
+            chatbotPanel.close();
+            chatbotPanel.open();
+          }
+        }
       })
 
       // sdk.Router.handleCustomRoute('semantic-search', (routeView) => {

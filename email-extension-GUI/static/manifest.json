@@ -22,10 +22,12 @@
       "activeTab",
       "storage",
       "identity",
-      "scripting"
+      "scripting",
+      "notifications"
     ],
     "host_permissions": [
-      "https://mail.google.com/"
+      "https://mail.google.com/",
+      "http://localhost:3001/*"
     ],
     "web_accessible_resources": [
       {

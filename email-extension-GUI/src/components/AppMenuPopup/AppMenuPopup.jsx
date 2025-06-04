@@ -97,7 +97,7 @@ export default function AppMenuPopup({ email, session }) {
                         <div>
                             <div className="flex items-center justify-between mb-6">
                                 <a href="http://localhost:3000" target="_blank">
-                                    <span className="text-xs text-gray-400">AI Powered Gmail</span>
+                                    <span className="text-xs text-gray-400">MailWise</span>
                                 </a>
                                 {
                                     isEnabled && (
@@ -109,7 +109,7 @@ export default function AppMenuPopup({ email, session }) {
                             {
                                 !isEnabled && (
                                     <div className="flex items-center justify-between mb-4">
-                                        <span className="text-sm text-gray-700">AI Powered Gmail is currently disabled for:</span>
+                                        <span className="text-sm text-gray-700">MailWise is currently disabled for:</span>
                                     </div>
                                 )
                             }
