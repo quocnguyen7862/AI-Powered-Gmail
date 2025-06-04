@@ -60,5 +60,11 @@ jobs:
               -e "GOOGLE_CLIENT_ID=${{secrets.GOOGLE_CLIENT_ID}}" \
               -e "GOOGLE_CLIENT_SECRET=${{secrets.GOOGLE_CLIENT_SECRET}}" \
               -e "GOOGLE_REDIRECT_URI=${{secrets.GOOGLE_REDIRECT_URI}}" \
+              -e "MONGODB_URL=${{secrets.MONGODB_URL}}" \
+              -e "MONGODB_DB=${{secrets.MONGODB_DB}}" \
+              -e "MONGODB_USER=${{secrets.MONGODB_USER}}" \
+              -e "MONGODB_PASS=${{secrets.MONGODB_PASS}}" \
+              -e "MODEL_URL=${{secrets.MODEL_URL}}" \
+              -e "JWT_ACCESS_SECRET=${{secrets.JWT_ACCESS_SECRET}}" \
               siuit/email-tracking-server:latest
             sudo docker image prune -f
