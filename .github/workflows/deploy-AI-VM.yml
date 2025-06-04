@@ -50,7 +50,7 @@ jobs:
             sudo docker rm -f email-ai-server || true
 
             sudo docker pull siuit/email-ai-server:latest
-            sudo docker run -d -p 8000:8000 --restart unless-stopped --name email-ai-server \
+            sudo docker run -d -p 8001:8000 --restart unless-stopped --name email-ai-server \
               -e "REDIS_URL=${{secrets.REDIS_URL}}" \
               siuit/email-ai-server:latest
             sudo docker image prune -f
