@@ -9,7 +9,9 @@ import {
   MONGODB_URL,
   MONGODB_USER,
   REDIS_HOST,
+  REDIS_PASS,
   REDIS_PORT,
+  REDIS_USER,
 } from '@environments';
 
 @Global()
@@ -29,6 +31,8 @@ import {
         return new Redis({
           host: REDIS_HOST,
           port: parseInt(REDIS_PORT),
+          username: REDIS_USER,
+          password: REDIS_PASS,
         });
       },
     },

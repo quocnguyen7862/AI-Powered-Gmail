@@ -12,7 +12,7 @@ import { BaseService } from '@/common/base/base.service';
 import { MessageName } from '@enums/message';
 import { UserRepository } from './repositories/user.repository';
 import { JwtService } from '@nestjs/jwt';
-import { JWT_ACCESS_SECRET } from '@environments';
+import { CLIENT_URL, JWT_ACCESS_SECRET } from '@environments';
 import { CreateSessionDto } from './dto/create-session.dto';
 import { LabelService } from '@/label/label.service';
 import { DEFAULT_LABELS } from '@/common/types/default-labels';
@@ -154,7 +154,7 @@ export class AuthService extends BaseService<UserEntity> {
 
     if (!existEmail) {
       return {
-        url: 'http://localhost:3000',
+        url: CLIENT_URL + '/auth/signin',
         isRegistered: false,
       };
     }

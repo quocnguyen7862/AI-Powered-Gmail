@@ -53,6 +53,8 @@ const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || '';
 
 const REDIS_HOST = process.env.REDIS_HOST || '';
 const REDIS_PORT = process.env.REDIS_PORT;
+const REDIS_USER = process.env.REDIS_USER || '';
+const REDIS_PASS = process.env.REDIS_PASS || '';
 
 const MONGODB_URL = process.env.MONGODB_URL || '';
 const MONGODB_DB = process.env.MONGODB_DB || '';
@@ -61,6 +63,7 @@ const MONGODB_PASS = process.env.MONGODB_PASS || '';
 
 const MODEL_URL = process.env.MODEL_URL || '';
 const MODEL_GRPC_URL = process.env.MODEL_GRPC_URL || '';
+const CLIENT_URL = process.env.CLIENT_URL || '';
 
 export {
   NODE_ENV,
@@ -108,4 +111,7 @@ export {
   MONGODB_PASS,
   MODEL_URL,
   MODEL_GRPC_URL,
+  REDIS_USER,
+  REDIS_PASS,
+  CLIENT_URL,
 };

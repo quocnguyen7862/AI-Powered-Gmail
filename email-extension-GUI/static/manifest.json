@@ -27,7 +27,8 @@
     ],
     "host_permissions": [
       "https://mail.google.com/",
-      "http://localhost:3001/*"
+      "http://localhost:3001/*",
+      "https://email-tracking-server-latest.onrender.com/*"
     ],
     "web_accessible_resources": [
       {
