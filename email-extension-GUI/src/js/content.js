@@ -1,6 +1,6 @@
 import * as InboxSDK from '@inboxsdk/core';
 import Api from './axios.config';
-import { URL_AUTH_CHECK, URL_CHAT_HISTORY, URL_SAVE_SENT_EMAIL, URL_SEARCH, URL_SUMMARIZE_BY_DRAFT, URL_SUMMARIZE_BY_MESSAGE, URL_TRACKING_STATUS } from './config';
+import { serverConfig, URL_AUTH_CHECK, URL_CHAT_HISTORY, URL_SAVE_SENT_EMAIL, URL_SEARCH, URL_SUMMARIZE_BY_DRAFT, URL_SUMMARIZE_BY_MESSAGE, URL_TRACKING_STATUS, URL_TRACKING_TRACK } from './config';
 import { ThreadStatus } from './enum';
 import { getSummaryModelHtml } from '../templates/summary-modal';
 import { createAppMenuPopup, createChatbotPanel, createReplyQuickPopup, createSelectLabels, createSummaryButton, createSummaryPopup } from '../components';
@@ -187,7 +187,7 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
           }
           const currentBody = composeView.getHTMLContent();
           trackingId = Date.now().toString();
-          const trackingPixel = `<img src="https://367b-116-105-161-175.ngrok-free.app/api/tracking/track/${trackingId}.gif" width="1" height="1" style="display:none" />`;
+          const trackingPixel = `<img src="${serverConfig.api}/${URL_TRACKING_TRACK}/${trackingId}.gif" width="1" height="1" style="display:none" />`;
           composeView.setBodyHTML(currentBody + trackingPixel);
 
           to = composeView.getToRecipients().map((recipient) => recipient.emailAddress);

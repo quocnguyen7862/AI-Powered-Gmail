@@ -18,3 +18,4 @@ export const URL_CHATBOT = 'summarize/chatbot'
 export const URL_SEARCH = 'summarize/search'
 export const URL_LABEL = 'label'
 export const URL_RE_SUMMARIZE = "summarize/regenerate";
+export const URL_TRACKING_TRACK = "tracking/track";

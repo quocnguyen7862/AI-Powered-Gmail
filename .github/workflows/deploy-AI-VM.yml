@@ -52,5 +52,6 @@ jobs:
             sudo docker pull siuit/email-ai-server:latest
             sudo docker run -d -p 8001:8000 --restart unless-stopped --name email-ai-server \
               -e "REDIS_URL=${{secrets.REDIS_URL}}" \
+              -v /home/azureuser/email-ai-server/user_tokens/:/app/app/user_tokens \
               siuit/email-ai-server:latest
             sudo docker image prune -f
