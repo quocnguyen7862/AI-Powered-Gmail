@@ -194,6 +194,28 @@ export class SummarizeService {
     // }
   }
 
+  async summarizeByHistoryId(email: string, historyId: string) {
+    const user = await this.authService.lookupAccessToken(email);
+    this.oauth2Client.setCredentials({
+      access_token: user.accessToken,
+    });
+
+    const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
+    const history = await gmail.users.history.list({
+      userId: 'me',
+      startHistoryId: historyId,
+      historyTypes: ['messageAdded'],
+    });
+
+    const messages = history.data.history?.flatMap((h) => h.messages) || [];
+    for (const message of messages) {
+      await this.summarizeByMessageId(
+        { threadId: message.threadId, messageId: message.id },
+        user,
+      );
+    }
+  }
+
   async reSummarizeByMessageId(
     emailData: EmailMessageDto,
     user: any,

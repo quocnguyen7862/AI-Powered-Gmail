@@ -144,6 +144,14 @@ export class AuthService extends BaseService<UserEntity> {
     }
   }
 
+  async lookupAccessToken(email: string): Promise<any> {
+    const user = await this.findByEmail(email);
+    if (!user || !user.accessToken) {
+      throw new UnauthorizedException('Access token not found');
+    }
+    return user;
+  }
+
   async getAuthUrl(email?: string): Promise<any> {
     const scopes = [
       'https://www.googleapis.com/auth/gmail.readonly',
