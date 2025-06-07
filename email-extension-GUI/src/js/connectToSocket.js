@@ -1,12 +1,12 @@
-import { Socket } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
+import { serverConfig } from "./config";
 
 let socket;
 
 export function connectToSocket(userId) {
     if (socket) return socket;
 
-    socket = io('http://localhost:3001/api', {
-        path: '/socket.io',
+    socket = io(serverConfig.api, {
         transports: ['websocket'],
         query: {
             userId: userId
@@ -21,18 +21,14 @@ export function connectToSocket(userId) {
         console.log('🔌 Socket disconnected');
     });
 
-    ocket.on('emailsRead', (data) => {
+    socket.on('emailRead', (data) => {
         console.log('📥 Received emailsRead:', data);
 
         // Gửi thông báo trình duyệt (Browser Notification API)
-        if (Notification.permission === 'granted') {
-            new Notification(data.message, {
-                icon: 'icon-128.png', // icon của extension nếu có
-                body: `Email IDs: ${data.emailIds.join(', ')}`,
-            });
-        } else {
-            Notification.requestPermission();
-        }
+        chrome.runtime.sendMessage({
+            type: "email_read",
+            message: data,
+        })
     });
 
     return socket

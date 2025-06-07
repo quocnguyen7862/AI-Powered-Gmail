@@ -3,20 +3,20 @@ export const serverConfig = {
     client_url: process.env.API_CLIENT,
 }
 
-export const URL_GMAIL_AUTH = 'auth/google'
-export const URL_SAVE_SENT_EMAIL = 'tracking/save-sent'
-export const URL_TRACKING_STATUS = 'tracking/status'
-export const URL_SUMMARIZE_BY_MESSAGE = 'summarize/by-message'
-export const URL_SUMMARIZE_BY_DRAFT = 'summarize/by-draft'
-export const URL_REPLY_SCENARIO = 'summarize/reply-scenario'
-export const URL_REPLY_GENERATE = 'summarize/reply-generate'
-export const URL_CHAT_HISTORY = 'summarize/chat-history'
-export const URL_THREADS_HISTORY = 'summarize/thread-history'
-export const URL_AUTH_CHECK = 'auth/check'
-export const URL_AUTH_LOGOUT = 'auth/logout'
-export const URL_TRACKING_STATS = 'tracking/stats'
-export const URL_CHATBOT = 'summarize/chatbot'
-export const URL_SEARCH = 'summarize/search'
-export const URL_LABEL = 'label'
-export const URL_RE_SUMMARIZE = "summarize/regenerate";
-export const URL_TRACKING_TRACK = "tracking/track";
+export const URL_GMAIL_AUTH = 'api/auth/google'
+export const URL_SAVE_SENT_EMAIL = 'api/tracking/save-sent'
+export const URL_TRACKING_STATUS = 'api/tracking/status'
+export const URL_SUMMARIZE_BY_MESSAGE = 'api/summarize/by-message'
+export const URL_SUMMARIZE_BY_DRAFT = 'api/summarize/by-draft'
+export const URL_REPLY_SCENARIO = 'api/summarize/reply-scenario'
+export const URL_REPLY_GENERATE = 'api/summarize/reply-generate'
+export const URL_CHAT_HISTORY = 'api/summarize/chat-history'
+export const URL_THREADS_HISTORY = 'api/summarize/thread-history'
+export const URL_AUTH_CHECK = 'api/auth/check'
+export const URL_AUTH_LOGOUT = 'api/auth/logout'
+export const URL_TRACKING_STATS = 'api/tracking/stats'
+export const URL_CHATBOT = 'api/summarize/chatbot'
+export const URL_SEARCH = 'api/summarize/search'
+export const URL_LABEL = 'api/label'
+export const URL_RE_SUMMARIZE = "api/summarize/regenerate";
+export const URL_TRACKING_TRACK = "api/tracking/track";

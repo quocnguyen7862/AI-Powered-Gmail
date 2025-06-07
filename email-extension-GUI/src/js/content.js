@@ -5,6 +5,7 @@ import { ThreadStatus } from './enum';
 import { getSummaryModelHtml } from '../templates/summary-modal';
 import { createAppMenuPopup, createChatbotPanel, createReplyQuickPopup, createSelectLabels, createSummaryButton, createSummaryPopup } from '../components';
 import { Bus } from 'baconjs'
+import { connectToSocket } from './connectToSocket';
 
 InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
   async function checkLogin(email) {
@@ -13,17 +14,17 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
       if (response.status === 200) {
         return {
           isSignedIn: true,
-          sessionId: response.data.sessionId,
+          userId: response.data.userId,
           accessToken: response.data.jwt_accessToken,
           fullName: response.data.fullName,
           email: response.data.email
         };
       } else {
-        return { isSignedIn: false, sessionId: undefined, accessToken: undefined, fullName: undefined };
+        return { isSignedIn: false, userId: undefined, accessToken: undefined, fullName: undefined };
       }
     }
     catch (error) {
-      return { isSignedIn: false, sessionId: undefined, accessToken: undefined, fullName: undefined };
+      return { isSignedIn: false, userId: undefined, accessToken: undefined, fullName: undefined };
     }
   }
 
@@ -52,6 +53,8 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
       //     }
       //   }
       // })
+
+      connectToSocket(session.userId)
 
       sdk.Toolbars.registerThreadButton({
         title: 'Summarize email',

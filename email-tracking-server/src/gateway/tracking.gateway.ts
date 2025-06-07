@@ -34,12 +34,12 @@ export class TrackingGateway
     }
   }
 
-  notifyEmailRead(userId: string, emailId: string) {
+  notifyEmailRead(userId: string, email: string, subject: string) {
     const client = this.clients.get(userId);
     if (client) {
       client.emit('emailRead', {
-        emailId,
-        message: `Email ${emailId} đã được đọc.`,
+        email,
+        subject,
       });
     } else {
       console.warn(`⚠️ No client found for user ${userId}`);

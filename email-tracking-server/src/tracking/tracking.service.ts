@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CustomLoggerService } from '@logger/logger.service';
 import { AuthService } from '@/auth/auth.service';
 import { BaseService } from '@/common/base/base.service';
@@ -10,6 +10,8 @@ import { TrackingRepository } from './repositories/tracking.repository';
 import { ReadedRepository } from './repositories/readed.repository';
 import { Between } from 'typeorm';
 import { TrackingGateway } from '@/gateway/tracking.gateway';
+import { OAuth2Client } from 'google-auth-library';
+import { google } from 'googleapis';
 
 @Injectable()
 export class TrackingService extends BaseService<TrackingEntity> {
@@ -19,6 +21,8 @@ export class TrackingService extends BaseService<TrackingEntity> {
     private readonly logger: CustomLoggerService,
     private readonly authService: AuthService,
     private readonly trackingGateway: TrackingGateway,
+    @Inject('OAUTH2_CLIENT')
+    private readonly oauth2Client: OAuth2Client,
   ) {
     super(MessageName.TRACKING, trackingRepository);
   }
@@ -59,6 +63,7 @@ export class TrackingService extends BaseService<TrackingEntity> {
         trackingId: trackingId,
         isSent: true,
       },
+      relations: ['user'],
     });
     if (email) {
       const readed = this.readedRepository.create({
@@ -66,7 +71,31 @@ export class TrackingService extends BaseService<TrackingEntity> {
         isRead: true,
       });
       await this.readedRepository.save(readed);
-      this.trackingGateway.notifyEmailRead(email.userId, email.threadId);
+
+      try {
+        this.oauth2Client.setCredentials({
+          access_token: email.user.accessToken,
+        });
+        const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
+
+        const message = await gmail.users.messages.get({
+          userId: 'me',
+          id: email.messageId,
+          format: 'metadata',
+        });
+        this.trackingGateway.notifyEmailRead(
+          email.userId,
+          email.user.email,
+          message.data.payload.headers.find(
+            (header) => header.name === 'Subject',
+          )?.value || '',
+        );
+      } catch (error) {
+        this.logger.error(
+          `Error tracking email open for user ${email.userId}: ${error.message}`,
+          error.stack,
+        );
+      }
     }
   }
 

@@ -10,7 +10,8 @@ module.exports = {
     popup: './src/js/popup.js',
     ReplyQuickPopup: './src/components/index.jsx',
     pageWorld: '@inboxsdk/core/pageWorld.js',
-    background: '@inboxsdk/core/background.js'
+    backgroundInboxsdk: '@inboxsdk/core/background.js',
+    background: './src/js/background.js',
   },
   devtool: 'source-map',
   module: {
