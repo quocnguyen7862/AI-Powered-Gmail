@@ -1,5 +1,6 @@
 export const serverConfig = {
-    api: process.env.API_URL
+    api: process.env.API_URL,
+    client_url: process.env.API_CLIENT,
 }
 
 export const URL_GMAIL_AUTH = 'auth/google'

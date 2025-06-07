@@ -1,7 +1,7 @@
 import { DatePicker, Skeleton, Switch } from "antd";
 import React, { useCallback, useEffect, useState } from "react";
 import Api from "../../js/axios.config";
-import { URL_AUTH_CHECK, URL_AUTH_LOGOUT, URL_GMAIL_AUTH, URL_TRACKING_STATS } from "../../js/config";
+import { serverConfig, URL_AUTH_CHECK, URL_AUTH_LOGOUT, URL_GMAIL_AUTH, URL_TRACKING_STATS } from "../../js/config";
 import dayjs from "dayjs";
 
 const DATE_FORMAT = 'YYYY/MM/DD';
@@ -96,7 +96,7 @@ export default function AppMenuPopup({ email, session }) {
                     ) : (
                         <div>
                             <div className="flex items-center justify-between mb-6">
-                                <a href="http://localhost:3000" target="_blank">
+                                <a href={serverConfig.client_url} target="_blank">
                                     <span className="text-xs text-gray-400">MailWise</span>
                                 </a>
                                 {
