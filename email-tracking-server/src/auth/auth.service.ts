@@ -97,6 +97,8 @@ export class AuthService extends BaseService<UserEntity> {
       skipUpdateIfNoValuesChanged: true,
     });
 
+    await this.setupWatch();
+
     // if (!existEmail) {
     //   await Promise.all(
     //     DEFAULT_LABELS.map(async (label) => {
@@ -313,5 +315,19 @@ export class AuthService extends BaseService<UserEntity> {
     }
     Object.assign(entity, data);
     return this.userRepo.save(entity);
+  }
+
+  async setupWatch() {
+    const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
+
+    const res = await gmail.users.watch({
+      userId: 'me',
+      requestBody: {
+        labelIds: ['INBOX'],
+        topicName: 'projects/ai-powered-gmail/topics/gmail-notifications',
+      },
+    });
+
+    return res.data;
   }
 }

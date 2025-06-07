@@ -152,4 +152,13 @@ export class SummarizeController {
     const result = await this.summarizeService.updateLanguage(user, language);
     return result;
   }
+
+  @Post('webhook')
+  async handlePubSub(@Body() body: any): Promise<any> {
+    const data = Buffer.from(body.message.data, 'base64').toString('utf-8');
+    const parsed = JSON.parse(data);
+
+    console.log('📩 Email update from Gmail:', parsed);
+    return { status: 'received' };
+  }
 }
