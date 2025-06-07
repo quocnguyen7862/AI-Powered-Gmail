@@ -19,6 +19,7 @@ async function bootstrap() {
       'chrome-extension://nolapbheihcobdcjflnkjbkpkelelfcn',
       'http://localhost:3000',
       'https://mail.google.com',
+      'https://ai-powered-gmail.vercel.app',
     ],
     credentials: true,
   });

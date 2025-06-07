@@ -202,7 +202,7 @@ export class SummarizeService {
     const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
     const history = await gmail.users.history.list({
       userId: 'me',
-      startHistoryId: historyId,
+      startHistoryId: user.lastHistoryId,
       historyTypes: ['messageAdded'],
     });
 
@@ -210,7 +210,7 @@ export class SummarizeService {
     const { data: userInfo } = await oauth2.userinfo.get();
 
     const messages = history.data.history?.flatMap((h) => h.messages) || [];
-    await Promise.all(
+    const summaries = await Promise.all(
       messages.map(async (message) => {
         return await this.summarizeByMessageId(
           { threadId: message.threadId, messageId: message.id },
@@ -222,6 +222,13 @@ export class SummarizeService {
         );
       }),
     );
+    if (messages.length > 0) {
+      await this.authService.updateByUserId(user.userId, {
+        lastHistoryId: historyId,
+      });
+    }
+
+    return summaries;
   }
 
   async reSummarizeByMessageId(

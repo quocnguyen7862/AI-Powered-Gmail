@@ -46,6 +46,9 @@ export class UserEntity extends BaseEntity {
   @Column({ default: true })
   enabledTracking: boolean;
 
+  @Column({ nullable: true })
+  lastHistoryId: string;
+
   @OneToMany(() => TrackingEntity, (trackingEntity) => trackingEntity.user)
   trackings: TrackingEntity[];
 

@@ -97,7 +97,7 @@ export class AuthService extends BaseService<UserEntity> {
       skipUpdateIfNoValuesChanged: true,
     });
 
-    await this.setupWatch();
+    await this.setupWatch(tokenInfo.userId);
 
     // if (!existEmail) {
     //   await Promise.all(
@@ -325,7 +325,7 @@ export class AuthService extends BaseService<UserEntity> {
     return this.userRepo.save(entity);
   }
 
-  async setupWatch() {
+  async setupWatch(userId: string) {
     const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
 
     const res = await gmail.users.watch({
@@ -335,6 +335,8 @@ export class AuthService extends BaseService<UserEntity> {
         topicName: 'projects/ai-powered-gmail/topics/gmail-notifications',
       },
     });
+
+    await this.updateByUserId(userId, { lastHistoryId: res.data.historyId });
 
     return res.data;
   }
