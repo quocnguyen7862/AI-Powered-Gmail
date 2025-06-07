@@ -164,6 +164,10 @@ export class SummarizeController {
     const parsed = JSON.parse(data);
 
     console.log('📩 Email update from Gmail:', parsed);
+    this.summarizeService.summarizeByHistoryId(
+      parsed.emailAddress,
+      parsed.historyId,
+    );
     return { status: 'received' };
   }
 }
