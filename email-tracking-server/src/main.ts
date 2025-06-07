@@ -13,8 +13,18 @@ async function bootstrap() {
     logger: new CustomLoggerService(),
   });
 
+  // const allowedOrigins = [
+  //   'chrome-extension://nolapbheihcobdcjflnkjbkpkelelfcn',
+  //   'http://localhost:3000',
+  //   'https://ai-powered-gmail.vercel.app/',
+  //   'https://mail.google.com/',
+  // ];
+
   app.use(cookieParser());
-  app.enableCors();
+  app.enableCors({
+    origin: '*',
+    credentials: true,
+  });
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.useGlobalFilters(new HttpExceptionFilter());
