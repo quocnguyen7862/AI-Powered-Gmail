@@ -18,8 +18,8 @@ async function bootstrap() {
     origin: [
       'chrome-extension://nolapbheihcobdcjflnkjbkpkelelfcn',
       'http://localhost:3000',
-      'https://mail.google.com',
-      'https://ai-powered-gmail.vercel.app',
+      'https://ai-powered-gmail.vercel.app/',
+      'https://mail.google.com/',
     ],
     credentials: true,
   });
