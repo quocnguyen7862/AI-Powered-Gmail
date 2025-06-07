@@ -20,11 +20,11 @@ import { ChatbotDto } from './dto/chatbot-message.dto';
 import { SummarizeEntity } from './entities/summarize.entity';
 
 @Controller('summarize')
-@Auth()
 export class SummarizeController {
   constructor(private readonly summarizeService: SummarizeService) {}
 
   @Get()
+  @Auth()
   async getSummaries(
     @User() user: any,
     @Query() filter: BaseFilterDto<SummarizeEntity>,
@@ -37,6 +37,7 @@ export class SummarizeController {
   }
 
   @Post('regenerate')
+  @Auth()
   async reSummarize(
     @Body() emailData: EmailMessageDto,
     @User() user: any,
@@ -95,6 +96,7 @@ export class SummarizeController {
   }
 
   @Get('chat-history/:draftId')
+  @Auth()
   async getChatHistory(
     @User() user: any,
     @Param('draftId') draftId: string,
@@ -111,12 +113,14 @@ export class SummarizeController {
   }
 
   @Get('thread-history')
+  @Auth()
   async getThreadHistory(@User() user: any): Promise<any> {
     const result = await this.summarizeService.getThreadHistory(user);
     return result;
   }
 
   @Delete('chat-history/:draftId')
+  @Auth()
   async deleteChatHistory(
     @User() user: any,
     @Param('draftId') draftId: string,
@@ -145,6 +149,7 @@ export class SummarizeController {
   }
 
   @Patch('language/:language')
+  @Auth()
   async updateLanguage(
     @User() user: any,
     @Param('language') language: string,
