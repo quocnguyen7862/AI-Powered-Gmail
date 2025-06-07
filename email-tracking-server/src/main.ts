@@ -13,24 +13,8 @@ async function bootstrap() {
     logger: new CustomLoggerService(),
   });
 
-  const allowedOrigins = [
-    'chrome-extension://nolapbheihcobdcjflnkjbkpkelelfcn',
-    'http://localhost:3000',
-    'https://ai-powered-gmail.vercel.app/',
-    'https://mail.google.com/',
-  ];
-
   app.use(cookieParser());
-  app.enableCors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-        callback(null, true); // Allow the request
-      } else {
-        callback(new Error('Not allowed by CORS')); // Deny the request
-      }
-    },
-    credentials: true,
-  });
+  app.enableCors();
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.useGlobalFilters(new HttpExceptionFilter());
