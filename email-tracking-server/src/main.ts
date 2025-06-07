@@ -11,19 +11,18 @@ import * as cookieParser from 'cookie-parser';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: new CustomLoggerService(),
-    cors: true,
   });
 
   app.use(cookieParser());
-  // app.enableCors({
-  //   origin: [
-  //     'chrome-extension://nolapbheihcobdcjflnkjbkpkelelfcn',
-  //     'http://localhost:3000',
-  //     'https://mail.google.com',
-  //     'https://ai-powered-gmail.vercel.app',
-  //   ],
-  //   credentials: true,
-  // });
+  app.enableCors({
+    origin: [
+      'chrome-extension://nolapbheihcobdcjflnkjbkpkelelfcn',
+      'http://localhost:3000',
+      'https://mail.google.com',
+      'https://ai-powered-gmail.vercel.app',
+    ],
+    credentials: true,
+  });
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.useGlobalFilters(new HttpExceptionFilter());
