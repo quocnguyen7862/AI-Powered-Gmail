@@ -144,7 +144,7 @@ export class AuthService extends BaseService<UserEntity> {
     }
   }
 
-  async lookupAccessToken(email: string): Promise<any> {
+  async lookupAccessToken(email: string): Promise<UserEntity> {
     const user = await this.findByEmail(email);
     if (!user || !user.accessToken) {
       throw new UnauthorizedException('Access token not found');

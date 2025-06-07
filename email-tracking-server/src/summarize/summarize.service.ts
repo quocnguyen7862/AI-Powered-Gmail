@@ -54,7 +54,6 @@ export class SummarizeService {
     emailData: EmailMessageDto,
     user: any,
   ): Promise<any> {
-    await this.modelService.getSelectedByUserId(user.id);
     const cached_summary = await this.getSummarizeById(emailData.messageId);
     if (cached_summary) {
       return cached_summary;
@@ -207,13 +206,22 @@ export class SummarizeService {
       historyTypes: ['messageAdded'],
     });
 
+    const oauth2 = google.oauth2({ version: 'v2', auth: this.oauth2Client });
+    const { data: userInfo } = await oauth2.userinfo.get();
+
     const messages = history.data.history?.flatMap((h) => h.messages) || [];
-    for (const message of messages) {
-      await this.summarizeByMessageId(
-        { threadId: message.threadId, messageId: message.id },
-        user,
-      );
-    }
+    await Promise.all(
+      messages.map(async (message) => {
+        return await this.summarizeByMessageId(
+          { threadId: message.threadId, messageId: message.id },
+          {
+            ...userInfo,
+            sessionId: user.sessionId,
+            summaryLanguage: user.summaryLanguage,
+          },
+        );
+      }),
+    );
   }
 
   async reSummarizeByMessageId(
