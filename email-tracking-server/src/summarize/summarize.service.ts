@@ -219,6 +219,16 @@ export class SummarizeService {
     const messages = history.data.history?.flatMap((h) => h.messages) || [];
     const summaries = await Promise.all(
       messages.map(async (message) => {
+        const msg = await gmail.users.messages.get({
+          userId: 'me',
+          id: message.id,
+          format: 'minimal',
+        });
+
+        if (!msg.data.labelIds.includes('INBOX')) {
+          return null; // Skip messages that are not in the INBOX
+        }
+
         const summary = await this.summarizeByMessageId(
           { threadId: message.threadId, messageId: message.id },
           {
