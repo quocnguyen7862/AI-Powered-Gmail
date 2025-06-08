@@ -42,4 +42,13 @@ export class LabelController {
   remove(@Param('id') id: string, @User() user: any) {
     return this.labelService.removeMyLabel(+id, user.id);
   }
+
+  @Post('classify/:messageId')
+  classifyLabel(
+    @Param('messageId') messageId: string,
+    @User() user: any,
+    @Body('summary') summary: string,
+  ) {
+    return this.labelService.classifyLabel(messageId, user, summary);
+  }
 }

@@ -21,6 +21,7 @@ import {
 } from '@environments';
 import { ModelService } from '@/model/model.service';
 import { ChatbotDto } from './dto/chatbot-message.dto';
+import { LabelService } from '@/label/label.service';
 
 @Injectable()
 export class SummarizeService {
@@ -33,6 +34,7 @@ export class SummarizeService {
     private readonly summarizeModel: Model<SummarizeEntity>,
     private readonly authService: AuthService,
     private readonly modelService: ModelService,
+    private readonly labelService: LabelService,
   ) {}
 
   private extractContentFromEmail(payload: any): string {
@@ -204,6 +206,7 @@ export class SummarizeService {
       userId: 'me',
       startHistoryId: user.lastHistoryId,
       historyTypes: ['messageAdded'],
+      labelId: 'INBOX',
     });
 
     const oauth2 = google.oauth2({ version: 'v2', auth: this.oauth2Client });
@@ -212,7 +215,7 @@ export class SummarizeService {
     const messages = history.data.history?.flatMap((h) => h.messages) || [];
     const summaries = await Promise.all(
       messages.map(async (message) => {
-        return await this.summarizeByMessageId(
+        const summary = await this.summarizeByMessageId(
           { threadId: message.threadId, messageId: message.id },
           {
             ...userInfo,
@@ -220,6 +223,18 @@ export class SummarizeService {
             summaryLanguage: user.summaryLanguage,
           },
         );
+
+        await this.labelService.classifyLabel(
+          message.id,
+          {
+            ...userInfo,
+            sessionId: user.sessionId,
+            summaryLanguage: user.summaryLanguage,
+          },
+          summary.summary,
+        );
+
+        return summary;
       }),
     );
     if (messages.length > 0) {

@@ -1,6 +1,7 @@
 import { UserEntity } from '@/auth/entities/user.entity';
 import { BaseEntity } from '@/common/base/base.entity';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { ClassifyEntity } from './classify.entity';
 
 @Entity({ name: 'labels' })
 export class LabelEntity extends BaseEntity {
@@ -22,4 +23,7 @@ export class LabelEntity extends BaseEntity {
   })
   @JoinColumn({ referencedColumnName: 'userId', name: 'userId' })
   user: UserEntity;
+
+  @OneToMany(() => ClassifyEntity, (classify) => classify.label)
+  classifies: ClassifyEntity[];
 }

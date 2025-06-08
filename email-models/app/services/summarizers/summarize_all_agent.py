@@ -14,7 +14,7 @@ Yêu cầu:
 3. Mỗi gạch đầu dòng chỉ nên dài 1 câu ngắn, truyền đạt rõ ràng một ý
 4. Không phân loại theo nguồn, chỉ tổng hợp nội dung cốt lõi
 5. Giữ đúng ngữ điệu, ngữ cảnh và không suy luận thêm
-6. Sử dụng ngôn ngữ đầu vào hoặc do người dùng chỉ định
+6. Dịch sang ngôn ngữ do người dùng chỉ định
 """
 
 # Prompt tổng hợp

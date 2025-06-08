@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseService } from '@/common/base/base.service';
 import { LabelEntity } from './entities/label.entity';
 import { LabelRepository } from './repositories/label.repository';
@@ -10,7 +10,8 @@ import { UpdateLabelDto } from './dto/update-label.dto';
 import { RemoveResult } from '@/common/types/remove-result';
 import { NotFoundException } from '@exceptions/not-found.exception';
 import { OAuth2Client } from 'google-auth-library';
-import { google } from 'googleapis';
+import { ModelService } from '@/model/model.service';
+import { ClassifyRepository } from './repositories/classify.repository';
 
 @Injectable()
 export class LabelService extends BaseService<LabelEntity> {
@@ -18,6 +19,8 @@ export class LabelService extends BaseService<LabelEntity> {
     private readonly labelRepo: LabelRepository,
     @Inject('OAUTH2_CLIENT')
     private readonly oauth2Client: OAuth2Client,
+    private readonly modelService: ModelService,
+    private readonly classifyRepo: ClassifyRepository,
   ) {
     super(MessageName.LABEL, labelRepo);
   }
@@ -47,11 +50,61 @@ export class LabelService extends BaseService<LabelEntity> {
     }
   }
 
+  async classifyLabel(messageId: string, user: any, summary: string) {
+    try {
+      const labels = await this.findMyAll(user.id);
+      const labelNames = labels.map(
+        (label) => `${label.name}:${label.description}`,
+      );
+
+      const model = await this.modelService.getSelectedByUserId(user.id);
+
+      const response = await axios.post(
+        MODEL_URL + 'label/classify-email',
+        {
+          user_id: user.id,
+          labels: labelNames,
+          summary: summary,
+          model: model.model,
+          provider: model.modelProvider,
+          api_key: model.apiKey,
+          api_key_type: model.apiKeyType,
+          user_name: user.name,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      const labelId = await this.labelRepo.findOne({
+        where: { name: response.data.label, userId: user.id, deletedAt: null },
+        select: {
+          id: true,
+        },
+      });
+
+      if (labelId) {
+        const classifiedLabels = this.classifyRepo.create({
+          messageId: messageId,
+          labelId: labelId.id,
+        });
+
+        await this.classifyRepo.save(classifiedLabels);
+      }
+
+      return { ...response.data };
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
   async createMyLabel(
     dto: CreateLabelDto,
     userId: string,
   ): Promise<LabelEntity> {
-    await this.embeddingLabel(dto.name, dto.description, userId);
+    // await this.embeddingLabel(dto.name, dto.description, userId);
     const entity = this.labelRepo.create({
       name: dto.name,
       description: dto.description,

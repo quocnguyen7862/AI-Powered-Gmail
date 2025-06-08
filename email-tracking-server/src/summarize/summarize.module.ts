@@ -4,6 +4,7 @@ import { SummarizeController } from './summarize.controller';
 import { SummarizeSchema } from './entities/summarize.entity';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ModelModule } from '@/model/model.module';
+import { LabelModule } from '@/label/label.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { ModelModule } from '@/model/model.module';
       { name: 'SUMMARIZE_MODEL', schema: SummarizeSchema },
     ]),
     ModelModule,
+    LabelModule,
   ],
   controllers: [SummarizeController],
   providers: [SummarizeService],
