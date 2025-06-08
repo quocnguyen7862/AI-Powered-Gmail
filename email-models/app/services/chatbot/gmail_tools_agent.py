@@ -114,7 +114,7 @@ class GamilToolAgent:
 
                 user_id = config["configurable"].get("user_id", str(uuid.uuid4()))
                 thread_id = config["configurable"].get("thread_id", str(uuid.uuid4()))
-                store._redis.lpush(f"{user_id}_{thread_id}", human_messages[-1].model_dump_json())
+                store._redis.lpush(f"{user_id}_{thread_id}", state["user_request"].model_dump_json())
                 store._redis.lpush(f"{user_id}_{thread_id}", agent_response.model_dump_json())
 
         except AttributeError as e:
