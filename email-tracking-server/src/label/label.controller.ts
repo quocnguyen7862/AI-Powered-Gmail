@@ -17,6 +17,10 @@ import { User } from '@/common/decorators/user.decorator';
 @Auth()
 export class LabelController {
   constructor(private readonly labelService: LabelService) {}
+  @Get('message/:messageId')
+  findByMessageId(@Param('messageId') messageId: string) {
+    return this.labelService.findByMessageId(messageId);
+  }
 
   @Post()
   create(@Body() createLabelDto: CreateLabelDto, @User() user: any) {
@@ -29,8 +33,8 @@ export class LabelController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.labelService.findById(+id);
+  findOne(@Param('id') id: string, @User() user: any) {
+    return this.labelService.findMyById(+id, user.id);
   }
 
   @Patch(':id')

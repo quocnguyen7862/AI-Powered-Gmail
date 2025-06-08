@@ -1,6 +1,6 @@
 import * as InboxSDK from '@inboxsdk/core';
 import Api from './axios.config';
-import { serverConfig, URL_AUTH_CHECK, URL_CHAT_HISTORY, URL_SAVE_SENT_EMAIL, URL_SEARCH, URL_SUMMARIZE_BY_DRAFT, URL_SUMMARIZE_BY_MESSAGE, URL_TRACKING_STATUS, URL_TRACKING_TRACK } from './config';
+import { serverConfig, URL_AUTH_CHECK, URL_CHAT_HISTORY, URL_LABEL, URL_SAVE_SENT_EMAIL, URL_SEARCH, URL_SUMMARIZE_BY_DRAFT, URL_SUMMARIZE_BY_MESSAGE, URL_TRACKING_STATUS, URL_TRACKING_TRACK } from './config';
 import { ThreadStatus } from './enum';
 import { getSummaryModelHtml } from '../templates/summary-modal';
 import { createAppMenuPopup, createChatbotPanel, createReplyQuickPopup, createSelectLabels, createSummaryButton, createSummaryPopup } from '../components';
@@ -25,6 +25,16 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
     }
     catch (error) {
       return { isSignedIn: false, userId: undefined, accessToken: undefined, fullName: undefined };
+    }
+  }
+
+  async function fetchLabels(session) {
+    try {
+      const response = await Api.get(URL_LABEL, {}, session?.accessToken);
+      return response.data
+    }
+    catch (error) {
+      console.error("Error fetching labels:", error);
     }
   }
 
@@ -55,6 +65,43 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
       // })
 
       connectToSocket(session.userId)
+
+
+      const navLabels = sdk.NavMenu.addNavItem({
+        name: 'AI Labels',
+        key: "AI_LABELS",
+        routeID: "AI_LABELS",
+        type: 'NAVIGATION'
+      })
+
+      fetchLabels(session).then((labels) => {
+        let selectedLabel = 0;
+        for (const label of labels) {
+          navLabels.addNavItem({
+            name: `${label.name} (${label.classifies.length})`,
+            key: label.id,
+            routeID: label.name,
+            type: 'NAVIGATION',
+            onClick: async () => {
+              selectedLabel = label.id;
+            },
+            backgroundColor: label.color,
+          })
+
+          sdk.Router.handleCustomListRoute(label.name, async (offset, max) => {
+            const response = await Api.get(URL_LABEL + `/${selectedLabel}`, {}, session?.accessToken);
+            const emails = response.data?.classifies
+            return {
+              threads: emails.map((email) => {
+                return {
+                  gmailThreadId: email.messageId,
+                }
+              }),
+              total: emails.length,
+            }
+          })
+        }
+      })
 
       sdk.Toolbars.registerThreadButton({
         title: 'Summarize email',
@@ -126,6 +173,23 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
             backgroundColor: backgroundColor,
           })
         }
+      })
+
+      sdk.Lists.registerThreadRowViewHandler(async (threadRowView) => {
+        const messsageId = await threadRowView.getThreadIDAsync();
+
+        try {
+          const response = await Api.get(`${URL_LABEL}/message/${messsageId}`, {}, session?.accessToken);
+          const label = response.data;
+          threadRowView.addLabel({
+            title: label.name,
+            backgroundColor: label.color,
+            foregroundColor: 'white',
+          })
+        } catch (error) {
+          console.error("Error fetching labels for message:", error);
+        }
+
       })
 
       sdk.Compose.registerComposeViewHandler(async (composeView) => {

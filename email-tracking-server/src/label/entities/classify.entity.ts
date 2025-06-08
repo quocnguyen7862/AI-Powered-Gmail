@@ -4,7 +4,7 @@ import { LabelEntity } from './label.entity';
 
 @Entity({ name: 'classifies' })
 export class ClassifyEntity extends BaseEntity {
-  @Column()
+  @Column({ unique: true })
   messageId: string;
 
   @Column()

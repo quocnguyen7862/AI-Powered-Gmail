@@ -40,7 +40,7 @@ const ManageLabels: React.FC = () => {
   const handleDelete = async () => {
     setConfirmLoading(true);
     try {
-      const response = await Api.delete(`${LABEL}/${deleteLabel}`);
+      const response = await Api.delete(`${LABEL}/${labelId}`);
       message.success("Label deleted successfully");
       fetchLabels();
     } catch (err: any) {
@@ -159,9 +159,9 @@ const ManageLabels: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="col-span-2 row-span-5">
+              {/* <div className="col-span-2 row-span-5">
                 <ChartThree />
-              </div>
+              </div> */}
             </div>
           </div>
           <div className="col-span-5">
@@ -185,45 +185,33 @@ const ManageLabels: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {/* {modelKeys.map((item, key) => (
+                    {labels.map((item, key) => (
                       <tr key={key}>
                         <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
                           <h5 className="font-medium text-black dark:text-white">
                             {item.name}
                           </h5>
                         </td>
-                        <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
+                        <td className="border-b border-[#eee] px-4 py-5 font-google dark:border-strokedark">
                           <p className="text-black dark:text-white">
-                            {item.provider}
+                            {item.description}
                           </p>
                         </td>
                         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                          <p className="text-black dark:text-white">
-                            {item.model}
-                          </p>
-                        </td>
-                        <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                          <p className="text-ellipsis text-nowrap text-black dark:text-white">
-                            {maskApiKey(item.key)}
-                          </p>
-                        </td>
-                        <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                          <p
-                            className={`inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium ${
-                              item.isSelected
-                                ? "bg-success text-success"
-                                : "bg-warning text-warning"
-                            }`}
-                          >
-                            {item.isSelected ? "In use" : "Unused"}
-                          </p>
+                          <ColorPicker
+                            defaultValue={item.color}
+                            disabled
+                            showText
+                          />
                         </td>
                         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                           <div className="flex items-center space-x-3.5">
                             <button
                               className="hover:text-red-600"
                               onClick={() => {
-                                setDeleteKey(item.key);
+                                setDeleteLabel(item.name);
+                                setLabelId(item.id);
+                                setOpen(true);
                               }}
                             >
                               <svg
@@ -241,11 +229,10 @@ const ManageLabels: React.FC = () => {
                                 ></path>
                               </svg>
                             </button>
-
                           </div>
                         </td>
                       </tr>
-                    ))} */}
+                    ))}
                   </tbody>
                 </table>
               </div>

@@ -34,4 +34,5 @@ export enum MessageName {
   SUMMARY = 'summary',
   MODEL = 'model',
   LABEL = 'label',
+  CLASSIFY = 'classify',
 }

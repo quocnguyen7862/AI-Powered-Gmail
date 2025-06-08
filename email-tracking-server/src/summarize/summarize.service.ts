@@ -225,7 +225,7 @@ export class SummarizeService {
         );
 
         await this.labelService.classifyLabel(
-          message.id,
+          message.threadId,
           {
             ...userInfo,
             sessionId: user.sessionId,

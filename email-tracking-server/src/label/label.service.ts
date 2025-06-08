@@ -78,7 +78,7 @@ export class LabelService extends BaseService<LabelEntity> {
         },
       );
 
-      console.log('Classify response:', response.data);
+      console.log('Classify response:', response.data.label, messageId);
 
       const labelId = await this.labelRepo.findOne({
         where: { name: response.data.label, userId: user.id, deletedAt: null },
@@ -93,7 +93,10 @@ export class LabelService extends BaseService<LabelEntity> {
           labelId: labelId.id,
         });
 
-        await this.classifyRepo.save(classifiedLabels);
+        await this.classifyRepo.upsert(classifiedLabels, {
+          conflictPaths: ['messageId'],
+          skipUpdateIfNoValuesChanged: true,
+        });
       }
 
       return { ...response.data };
@@ -178,8 +181,35 @@ export class LabelService extends BaseService<LabelEntity> {
     const labels = await this.labelRepo.find({
       where: { userId: userId, deletedAt: null },
       order: { createdAt: 'DESC' },
+      relations: ['classifies'],
     });
 
     return labels;
+  }
+
+  async findMyById(id: number, userId: string): Promise<LabelEntity> {
+    const label = await this.labelRepo.findOne({
+      where: { id: id, userId: userId, deletedAt: null },
+      relations: ['classifies'],
+    });
+
+    if (!label) {
+      throw new NotFoundException(MessageName.LABEL);
+    }
+
+    return label;
+  }
+
+  async findByMessageId(messageId: string): Promise<LabelEntity> {
+    const classify = await this.classifyRepo.findOne({
+      where: { messageId: messageId, deletedAt: null },
+      relations: ['label'],
+    });
+
+    if (!classify) {
+      throw new NotFoundException(MessageName.CLASSIFY);
+    }
+
+    return classify.label;
   }
 }

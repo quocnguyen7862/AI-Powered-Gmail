@@ -115,7 +115,7 @@ const MangeSummaries = () => {
                         <select
                           {...register("language")}
                           className={
-                            "font-google relative z-20 w-full appearance-none rounded border border-stroke bg-transparent px-3 py-1 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary "
+                            "relative z-20 w-full appearance-none rounded border border-stroke bg-transparent px-3 py-1 font-google outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary "
                           }
                           value={watch("language")}
                         >
@@ -239,7 +239,10 @@ const MangeSummaries = () => {
                   </table>
                 </div>
                 <Pagination
-                  pageSize={50}
+                  onChange={(page: any) => {
+                    fetchMessages(page);
+                  }}
+                  pageSize={10}
                   defaultCurrent={currentPage}
                   total={totalMessages}
                   showTotal={(total) => `Total ${total} email`}
@@ -266,7 +269,7 @@ const MangeSummaries = () => {
                 <select
                   disabled={loading}
                   className={
-                    "font-google relative z-20 appearance-none rounded border border-stroke bg-transparent px-3 py-1 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary "
+                    "relative z-20 appearance-none rounded border border-stroke bg-transparent px-3 py-1 font-google outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary "
                   }
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                     reSummarize(
