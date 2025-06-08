@@ -58,6 +58,12 @@ const models = [
     apiKeyType: "XAI_API_KEY",
     models: ["grok-3-latest", "grok-3-fast-latest", "grok-3-mini-fast-latest"],
   },
+  {
+    name: "Mistral AI",
+    provider: "mistralai",
+    apiKeyType: "MISTRAL_API_KEY",
+    models: ["pixtral-12b-2409", "open-mistral-nemo"],
+  },
 ];
 
 const MagageModels: React.FC = () => {

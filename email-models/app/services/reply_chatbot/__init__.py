@@ -14,10 +14,10 @@ with (RedisStore.from_conn_string(REDIS_URL) as store,
     store.setup()
     checkpointer.setup()
 
-    def create_agent_graph(model_name: str = 'gpt-4o-mini', api_key_type='OPENAI_API_KEY', api_key: str = '') -> StateGraph:
+    def create_agent_graph(model_name: str = 'gpt-4o-mini', api_key_type='OPENAI_API_KEY', api_key: str = '',provider:str = 'openai') -> StateGraph:
         # Initialize agents
         os.environ[api_key_type] = api_key
-        llm = init_chat_model(model_name)
+        llm = init_chat_model(model_name,model_provider=provider)
 
         generate_reply = GenerateReplyAgent(llm)
         summarize_attachments = SummarizeAttachmentsAgent(llm)

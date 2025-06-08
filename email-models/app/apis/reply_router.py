@@ -26,7 +26,9 @@ async def reply_generate(request: ReplyRequest):
         replay_workflow  = create_agent_graph(
             model_name=request.model, 
             api_key_type=request.api_key_type, 
-            api_key=request.api_key)
+            api_key=request.api_key,
+            provider=request.provider
+            )
         
         config = RunnableConfig(configurable={"thread_id": request.draft_id,"user_id":request.user_id})
         

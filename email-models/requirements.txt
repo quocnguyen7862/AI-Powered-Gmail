@@ -25,3 +25,4 @@ langchain-qdrant
 langchain[google-genai]
 langchain[anthropic]
 langchain-xai
+langchain[mistralai]

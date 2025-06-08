@@ -24,7 +24,8 @@ async def reply_scenario(request: ScenarioRequest):
         scenario_workflow = create_agent_graph(            
             model_name=request.model, 
             api_key_type=request.api_key_type, 
-            api_key=request.api_key
+            api_key=request.api_key,
+            provider=request.provider
             )
         result = scenario_workflow.invoke(state)
         if result['done']:

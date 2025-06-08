@@ -9,7 +9,7 @@ from app.services.search.search_agent import SearchAgent
 from app.helpers.gmail_search import GmailSearch
 from app.helpers.search_state import SearchState
 
-def create_agent_graph(gmail_creds,model_name: str = 'gpt-4o-mini', api_key_type='OPENAI_API_KEY', api_key: str = '') -> StateGraph:
+def create_agent_graph(gmail_creds,model_name: str = 'gpt-4o-mini', api_key_type='OPENAI_API_KEY', api_key: str = '',provider:str='openai') -> StateGraph:
     # Gmail API credentials
     api_resource = build_resource_service(gmail_creds)
     toolkit = GmailToolkit(api_resource=api_resource)
@@ -21,7 +21,7 @@ def create_agent_graph(gmail_creds,model_name: str = 'gpt-4o-mini', api_key_type
 
     # Initialize agents
     os.environ[api_key_type] = api_key
-    llm = init_chat_model(model_name)
+    llm = init_chat_model(model_name,model_provider=provider)
     search_agent = SearchAgent(llm,tools)
 
     # Create summarizer workflow

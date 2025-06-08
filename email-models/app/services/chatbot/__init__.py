@@ -32,7 +32,7 @@ with (RedisStore.from_conn_string(REDIS_URL) as store,
     store.setup()
     checkpointer.setup()
 
-    def create_agent_graph(gmail_creds,model_name: str = 'gpt-4o-mini', api_key_type='OPENAI_API_KEY', api_key: str = '') -> StateGraph:
+    def create_agent_graph(gmail_creds,model_name: str = 'gpt-4o-mini', api_key_type='OPENAI_API_KEY', api_key: str = '',provider:str = 'openai') -> StateGraph:
         # Gmail API credentials
         api_resource = build_resource_service(gmail_creds)
         toolkit = GmailToolkit(api_resource=api_resource)
@@ -58,7 +58,7 @@ with (RedisStore.from_conn_string(REDIS_URL) as store,
 
         # Initialize agents
         os.environ[api_key_type] = api_key
-        llm = init_chat_model(model_name)
+        llm = init_chat_model(model_name,model_provider=provider)
         gmail_chatbot = GamilToolAgent(llm,tools,checkpointer=checkpointer)
         summarize_conversation = SummarizeConversationAgent(llm)
 

@@ -50,6 +50,7 @@ async def chatbot(request: ChatbotRequest):
             model_name=request.model,
             api_key_type= request.api_key_type,
             api_key=request.api_key,
+            provider=request.provider
         )
 
         config = RunnableConfig(configurable={"thread_id":request.thread_id,"user_id":request.user_id})

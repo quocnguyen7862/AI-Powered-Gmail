@@ -48,6 +48,7 @@ async def search(request: ChatbotRequest):
             model_name=request.model, 
             api_key_type=request.api_key_type, 
             api_key=request.api_key,
+            provider=request.provider
         )
 
         result = search_workflow.invoke(state)
