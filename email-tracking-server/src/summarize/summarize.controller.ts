@@ -160,13 +160,13 @@ export class SummarizeController {
 
   @Post('webhook')
   async handlePubSub(@Body() body: any): Promise<any> {
-    // const data = Buffer.from(body.message.data, 'base64').toString('utf-8');
-    // const parsed = JSON.parse(data);
+    const data = Buffer.from(body.message.data, 'base64').toString('utf-8');
+    const parsed = JSON.parse(data);
 
-    // console.log('📩 Email update from Gmail:', parsed);
+    console.log('📩 Email update from Gmail:', parsed);
     return await this.summarizeService.summarizeByHistoryId(
-      body.emailAddress,
-      body.historyId,
+      parsed.emailAddress,
+      parsed.historyId,
     );
   }
 }

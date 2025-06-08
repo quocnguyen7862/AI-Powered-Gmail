@@ -78,6 +78,8 @@ export class LabelService extends BaseService<LabelEntity> {
         },
       );
 
+      console.log('Classify response:', response.data);
+
       const labelId = await this.labelRepo.findOne({
         where: { name: response.data.label, userId: user.id, deletedAt: null },
         select: {
