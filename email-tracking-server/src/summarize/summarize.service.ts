@@ -55,6 +55,7 @@ export class SummarizeService {
   async summarizeByMessageId(
     emailData: EmailMessageDto,
     user: any,
+    saveSummary: boolean = true,
   ): Promise<any> {
     const cached_summary = await this.getSummarizeById(emailData.messageId);
     if (cached_summary) {
@@ -118,20 +119,22 @@ export class SummarizeService {
         },
       );
 
-      await this.saveSummarize({
-        messageId: emailData.messageId,
-        subject: message.data.payload.headers.find(
-          (header) => header.name === 'Subject',
-        ).value,
-        summary: response.data.summary,
-        userId: user.id,
-        sentAt: new Date(Number(message.data.internalDate)),
-        from: message.data.payload.headers.find(
-          (header) => header.name === 'From',
-        ).value,
-        threadId: emailData.threadId,
-        language: language,
-      });
+      if (saveSummary) {
+        await this.saveSummarize({
+          messageId: emailData.messageId,
+          subject: message.data.payload.headers.find(
+            (header) => header.name === 'Subject',
+          ).value,
+          summary: response.data.summary,
+          userId: user.id,
+          sentAt: new Date(Number(message.data.internalDate)),
+          from: message.data.payload.headers.find(
+            (header) => header.name === 'From',
+          ).value,
+          threadId: emailData.threadId,
+          language: language,
+        });
+      }
 
       return { ...response.data, language: language };
     } catch (error) {
@@ -172,6 +175,7 @@ export class SummarizeService {
         messageId: messageInReplyTo.id,
       },
       user,
+      false,
     );
 
     // const requestBody = {
