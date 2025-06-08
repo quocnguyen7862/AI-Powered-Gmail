@@ -1,9 +1,9 @@
 import * as InboxSDK from '@inboxsdk/core';
 import Api from './axios.config';
-import { serverConfig, URL_AUTH_CHECK, URL_CHAT_HISTORY, URL_LABEL, URL_SAVE_SENT_EMAIL, URL_SEARCH, URL_SUMMARIZE_BY_DRAFT, URL_SUMMARIZE_BY_MESSAGE, URL_TRACKING_STATUS, URL_TRACKING_TRACK } from './config';
+import { serverConfig, URL_AUTH_CHECK, URL_CHAT_HISTORY, URL_LABEL, URL_SAVE_SENT_EMAIL, URL_SEARCH, URL_SUMMARIZE_BY_DRAFT, URL_SUMMARIZE_BY_MESSAGE, URL_TRACKING_READED, URL_TRACKING_STATUS, URL_TRACKING_TRACK } from './config';
 import { ThreadStatus } from './enum';
 import { getSummaryModelHtml } from '../templates/summary-modal';
-import { createAppMenuPopup, createChatbotPanel, createReplyQuickPopup, createSelectLabels, createSummaryButton, createSummaryPopup } from '../components';
+import { createAppMenuPopup, createChatbotPanel, createReplyQuickPopup, createSelectLabels, createSummaryButton, createSummaryPopup, createTrackingPanel, destroyComponent } from '../components';
 import { Bus } from 'baconjs'
 import { connectToSocket } from './connectToSocket';
 
@@ -34,7 +34,7 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
       return response.data
     }
     catch (error) {
-      console.error("Error fetching labels:", error);
+      // console.error("Error fetching labels:", error);
     }
   }
 
@@ -129,9 +129,6 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
         const threadId = await threadView.getThreadIDAsync();
         const messageId = await messageView.getMessageIDAsync();
 
-        const labels = messageView.getMessageLabels ? await messageView.getMessageLabels() : [];
-        const isSent = labels.includes('SENT');
-
         const bodyElement = messageView.getBodyElement();
 
         if (bodyElement) {
@@ -165,7 +162,7 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
             backgroundColor = "white";
           }
         } catch (error) {
-          console.error("Error checking tracking status:", error);
+          // console.error("Error checking tracking status:", error);
         } finally {
           threadRowView.addLabel({
             title: statusTest,
@@ -300,6 +297,9 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
         });
       })
 
+      const trackingPanelEl = document.createElement('div');
+      let trackingPanel = null;
+
       sdk.Conversations.registerThreadViewHandler(async (threadView) => {
 
         const threadId = await threadView.getThreadIDAsync();
@@ -312,6 +312,27 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
           chatbotPanel.close();
           chatbotPanel.open();
         }
+
+        try {
+          const response = await Api.get(URL_TRACKING_READED + `/${threadId}`, {}, session?.accessToken);
+          const trackings = response.data;
+          if (trackings.length > 0) {
+            trackingPanelEl.className = 'h-full';
+            createTrackingPanel({ el: trackingPanelEl, trackings: trackings })
+            sdk.Global.addSidebarContentPanel(
+              {
+                title: 'Email Tracking',
+                el: trackingPanelEl,
+                iconUrl: "https://img.icons8.com/pulsar-color/48/feedback.png"
+              }
+            ).then((panel) => {
+              trackingPanel = panel;
+              panel.open();
+            })
+          }
+        } catch (error) {
+
+        }
       })
 
       sdk.Router.handleAllRoutes((routeView) => {
@@ -321,6 +342,11 @@ InboxSDK.load(2, "sdk_AIPoweredGmail_c0c468e70b").then((sdk) => {
           if (!!chatbotPanel && chatbotPanel.isActive()) {
             chatbotPanel.close();
             chatbotPanel.open();
+          }
+
+          if (trackingPanel) {
+            trackingPanel.close();
+            destroyComponent(trackingPanelEl);
           }
         }
       })

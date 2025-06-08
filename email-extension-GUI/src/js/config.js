@@ -20,3 +20,4 @@ export const URL_SEARCH = 'api/summarize/search'
 export const URL_LABEL = 'api/label'
 export const URL_RE_SUMMARIZE = "api/summarize/regenerate";
 export const URL_TRACKING_TRACK = "api/tracking/track";
+export const URL_TRACKING_READED = "api/tracking/readed";

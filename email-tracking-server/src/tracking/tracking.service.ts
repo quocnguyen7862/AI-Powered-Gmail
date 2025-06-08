@@ -106,11 +106,14 @@ export class TrackingService extends BaseService<TrackingEntity> {
   async getTrackingStats(sessionId: string, start: Date, end: Date) {
     const user = await this.authService.findBySessionId(sessionId);
 
+    const endPlusOne = new Date(end);
+    endPlusOne.setDate(endPlusOne.getDate() + 1);
+
     const sentCount = await this.trackingRepository.count({
       where: {
         userId: user.userId,
         isSent: true,
-        createdAt: Between(start, end),
+        createdAt: Between(start, endPlusOne),
       },
     });
 
@@ -119,9 +122,46 @@ export class TrackingService extends BaseService<TrackingEntity> {
       .leftJoinAndSelect('readed.tracking', 'tracking')
       .where('tracking.userId = :userId', { userId: user.userId })
       .andWhere('readed.isRead = :isRead', { isRead: true })
-      .andWhere('readed.createdAt BETWEEN :start AND :end', { start, end })
-      .getCount();
+      .andWhere('readed.createdAt BETWEEN :start AND :end', {
+        start,
+        end: endPlusOne,
+      })
+      .select('COUNT(DISTINCT readed.trackingId)', 'count')
+      .getRawOne();
 
-    return { sentCount, openedCount };
+    return { sentCount, openedCount: openedCount?.count || 0 };
+  }
+
+  async getTrackingByThreadId(user: any, threadId: string): Promise<any> {
+    const emails = await this.trackingRepository.find({
+      where: {
+        userId: user.id,
+        threadId: threadId,
+      },
+      relations: ['readeds'],
+    });
+
+    const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
+
+    const trackings = await Promise.all(
+      emails.map(async (email) => {
+        const messsage = await gmail.users.messages.get({
+          userId: 'me',
+          id: email.messageId,
+          format: 'metadata',
+        });
+
+        const subject = messsage.data.payload.headers.find(
+          (header) => header.name === 'Subject',
+        ).value;
+
+        return {
+          ...email,
+          subject,
+        };
+      }),
+    );
+
+    return trackings;
   }
 }

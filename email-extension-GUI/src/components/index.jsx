@@ -5,6 +5,7 @@ import SummaryPopup, { SummaryButton } from "./SummaryPopup/SummaryPopup";
 import AppMenuPopup from "./AppMenuPopup/AppMenuPopup";
 import ChatbotPanel from "./ChatbotPanel/ChatbotPanel";
 import SelectLabels from "./SelectLabels/SelectLabels";
+import TrackingPanel from "./TrackingPanel/TrackingPanel";
 
 function getOrCreateRoot(el) {
     if (!el.__reactRoot) {
@@ -53,4 +54,18 @@ export function createSelectLabels({ el, session }) {
     root.render(
         <SelectLabels session={session} />
     )
+}
+
+export function createTrackingPanel({ el, trackings }) {
+    const root = getOrCreateRoot(el);
+    root.render(
+        <TrackingPanel trackings={trackings} />
+    )
+}
+
+export function destroyComponent(el) {
+    if (el.__reactRoot) {
+        el.__reactRoot.unmount();
+        delete el.__reactRoot;
+    }
 }

@@ -57,4 +57,10 @@ export class TrackingController {
       new Date(endDate),
     );
   }
+
+  @Get('/readed/:threadId')
+  @Auth()
+  async getByThreadId(@Param('threadId') threadId: string, @User() user: any) {
+    return await this.trackingService.getTrackingByThreadId(user, threadId);
+  }
 }

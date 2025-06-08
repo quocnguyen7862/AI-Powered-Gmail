@@ -81,7 +81,7 @@ const GmailTrackingPage: React.FC = () => {
                   )}
                 />
               </div>
-              <div className="font-google flex justify-between gap-6">
+              <div className="flex justify-evenly gap-6 font-google">
                 <div className="flex h-[100px] w-[32.8%] items-center justify-center gap-6 rounded-[5px] bg-[#f4f7f9]">
                   <div className="h-[60px] w-[60px] rounded-md bg-white p-2">
                     <img
@@ -111,14 +111,24 @@ const GmailTrackingPage: React.FC = () => {
                   </div>
                   <div className="box-border">
                     <p className="mb-[3px] text-[32px] font-bold leading-[1] text-[#8cd622]">
-                      {trackingStats.openedCount || 0}
+                      {trackingStats.sentCount !== 0
+                        ? (
+                            (trackingStats.openedCount /
+                              trackingStats.sentCount) *
+                            100
+                          ).toFixed(0)
+                        : 0}
+                      %
+                      <span className="ms-[3px] text-[14px] font-semibold text-[#666]">
+                        ({trackingStats.openedCount || 0})
+                      </span>
                     </p>
                     <p className="text-[14px] font-semibold text-[#666]">
                       Opened
                     </p>
                   </div>
                 </div>
-                <div className="flex h-[100px] w-[32.8%] items-center justify-center gap-6 rounded-[5px] bg-[#f4f7f9]">
+                {/* <div className="flex h-[100px] w-[32.8%] items-center justify-center gap-6 rounded-[5px] bg-[#f4f7f9]">
                   <div className="h-[60px] w-[60px] rounded-md bg-white p-2">
                     <img
                       width="48"
@@ -144,7 +154,7 @@ const GmailTrackingPage: React.FC = () => {
                       Unread
                     </p>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

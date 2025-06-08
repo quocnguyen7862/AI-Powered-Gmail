@@ -145,7 +145,7 @@ export default function AppMenuPopup({ email, session }) {
                                                 )}
                                             />
                                         </div>
-                                        <div className="flex justify-between text-center font-bold mb-4">
+                                        <div className="flex justify-evenly text-center font-bold mb-4">
                                             <div>
                                                 <div className="text-sm text-gray-400">Tracking</div>
                                                 <div className="text-2xl font-bold text-gray-700">{trackingStats.sentCount || 0}</div>
@@ -154,16 +154,16 @@ export default function AppMenuPopup({ email, session }) {
                                                 <div className="text-sm text-gray-400">Open</div>
                                                 <div className="flex flex-row gap-1 justify-center items-end">
                                                     <span className="text-2xl font-bold text-green-500 ">{trackingStats.openedCount || 0}</span>
-                                                    {/* <span className="text-sm text-gray-400">{trackingStats.sentCount !== 0 ? (trackingStats.openedCount / trackingStats.sentCount).toFixed(2) : 0}%</span> */}
+                                                    <span className="text-sm text-gray-400">{trackingStats.sentCount !== 0 ? ((trackingStats.openedCount / trackingStats.sentCount).toFixed(2) * 100) : 0}%</span>
                                                 </div>
                                             </div>
-                                            <div>
+                                            {/* <div>
                                                 <div className="text-sm text-gray-400">Unread</div>
                                                 <div className="flex flex-row gap-1 justify-center items-end">
                                                     <span className="text-2xl font-bold text-yellow-500 ">{trackingStats.unopenedCount || 0}</span>
                                                     <span className="text-sm text-gray-400">{trackingStats.sentCount !== 0 ? (trackingStats.unopenedCount / trackingStats.sentCount).toFixed(2) : 0}%</span>
                                                 </div>
-                                            </div>
+                                            </div> */}
                                         </div>
                                     </>
                                 )
