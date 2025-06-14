@@ -13,6 +13,7 @@ import { UserRepository } from './repositories/user.repository';
 import { AccessTokenStrategy } from './strategies/accessToken.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { LabelModule } from '@/label/label.module';
+import { ModelModule } from '@/model/model.module';
 
 @Global()
 @Module({
@@ -20,6 +21,7 @@ import { LabelModule } from '@/label/label.module';
     JwtModule.register({}),
     TypeOrmModule.forFeature([UserEntity]),
     LabelModule,
+    ModelModule,
   ],
   controllers: [AuthController],
   providers: [

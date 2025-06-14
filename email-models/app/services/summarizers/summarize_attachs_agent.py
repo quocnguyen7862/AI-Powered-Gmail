@@ -10,8 +10,10 @@ from langchain.prompts.chat import (
 from app.helpers.email_state import EmailState
 import base64
 import os
+from openai import OpenAI
 
-md = MarkItDown()
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+md = MarkItDown(llm_client=client,llm_model="gpt-4o-mini")
 
 system_msg = """Bạn là trợ lý AI chuyên tóm tắt tài liệu một cách ngắn gọn và rõ ràng.
 

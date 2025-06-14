@@ -5,7 +5,7 @@ import { ModelRepository } from './repositories/model.repository';
 import { MessageName } from '@enums/message';
 import { CheckModelDto } from './dto/check-model.dto';
 import axios from 'axios';
-import { MODEL_URL } from '@environments';
+import { DEFAULT_API_KEY, MODEL_URL } from '@environments';
 import { CreateModelDto } from './dto/create-model.dto';
 import { UpdateAuthDto } from '@/auth/dto/update-auth.dto';
 import { NotFoundException } from '@exceptions/not-found.exception';
@@ -127,6 +127,11 @@ export class ModelService extends BaseService<ModelEntity> {
         HttpStatus.NOT_FOUND,
       );
     }
+
+    if (entity.apiKey === 'Free') {
+      entity.apiKey = DEFAULT_API_KEY;
+    }
+
     return entity;
   }
 

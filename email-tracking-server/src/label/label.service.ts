@@ -4,7 +4,7 @@ import { LabelEntity } from './entities/label.entity';
 import { LabelRepository } from './repositories/label.repository';
 import { MessageName } from '@enums/message';
 import axios from 'axios';
-import { MODEL_URL } from '@environments';
+import { MODEL_URL2 } from '@environments';
 import { CreateLabelDto } from './dto/create-label.dto';
 import { UpdateLabelDto } from './dto/update-label.dto';
 import { RemoveResult } from '@/common/types/remove-result';
@@ -32,7 +32,7 @@ export class LabelService extends BaseService<LabelEntity> {
   ): Promise<any> {
     try {
       const response = await axios.post(
-        MODEL_URL + 'label/embed-label',
+        MODEL_URL2 + 'label/embed-label',
         {
           label: label,
           description: desc,
@@ -60,7 +60,7 @@ export class LabelService extends BaseService<LabelEntity> {
       const model = await this.modelService.getSelectedByUserId(user.id);
 
       const response = await axios.post(
-        MODEL_URL + 'label/classify-email',
+        MODEL_URL2 + 'label/classify-email',
         {
           user_id: user.id,
           labels: labelNames,

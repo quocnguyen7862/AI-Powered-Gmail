@@ -12,10 +12,18 @@ import { BaseService } from '@/common/base/base.service';
 import { MessageName } from '@enums/message';
 import { UserRepository } from './repositories/user.repository';
 import { JwtService } from '@nestjs/jwt';
-import { CLIENT_URL, JWT_ACCESS_SECRET } from '@environments';
+import {
+  CLIENT_URL,
+  DEFAULT_API_KEY_TYPE,
+  DEFAULT_MODEL,
+  DEFAULT_MODEL_NAME,
+  DEFAULT_PROVIDER,
+  JWT_ACCESS_SECRET,
+} from '@environments';
 import { CreateSessionDto } from './dto/create-session.dto';
 import { LabelService } from '@/label/label.service';
 import { DEFAULT_LABELS } from '@/common/types/default-labels';
+import { ModelService } from '@/model/model.service';
 
 @Injectable()
 export class AuthService extends BaseService<UserEntity> {
@@ -25,6 +33,7 @@ export class AuthService extends BaseService<UserEntity> {
     private readonly oauth2Client: OAuth2Client,
     private readonly userRepo: UserRepository,
     private readonly labelService: LabelService,
+    private readonly modelService: ModelService,
   ) {
     super(MessageName.USER, userRepo);
   }
@@ -97,6 +106,8 @@ export class AuthService extends BaseService<UserEntity> {
       skipUpdateIfNoValuesChanged: true,
     });
 
+    this.oauth2Client.setCredentials({ access_token: tokenInfo.accessToken });
+
     await this.setupWatch(tokenInfo.userId);
 
     if (!existEmail) {
@@ -111,6 +122,17 @@ export class AuthService extends BaseService<UserEntity> {
             tokenInfo.userId,
           );
         }),
+      );
+
+      await this.modelService.createMyModel(
+        {
+          name: DEFAULT_MODEL_NAME,
+          provider: DEFAULT_PROVIDER,
+          model: DEFAULT_MODEL,
+          apiKey: 'Free',
+          apiKeyType: DEFAULT_API_KEY_TYPE,
+        },
+        tokenInfo.userId,
       );
     }
 

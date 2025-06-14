@@ -62,8 +62,15 @@ const MONGODB_USER = process.env.MONGODB_USER || '';
 const MONGODB_PASS = process.env.MONGODB_PASS || '';
 
 const MODEL_URL = process.env.MODEL_URL || '';
+const MODEL_URL2 = process.env.MODEL_URL2 || '';
 const MODEL_GRPC_URL = process.env.MODEL_GRPC_URL || '';
 const CLIENT_URL = process.env.CLIENT_URL || '';
+
+const DEFAULT_MODEL_NAME = process.env.DEFAULT_MODEL_NAME;
+const DEFAULT_MODEL = process.env.DEFAULT_MODEL;
+const DEFAULT_PROVIDER = process.env.DEFAULT_PROVIDER;
+const DEFAULT_API_KEY = process.env.DEFAULT_API_KEY;
+const DEFAULT_API_KEY_TYPE = process.env.DEFAULT_API_KEY_TYPE;
 
 export {
   NODE_ENV,
@@ -114,4 +121,10 @@ export {
   REDIS_USER,
   REDIS_PASS,
   CLIENT_URL,
+  MODEL_URL2,
+  DEFAULT_MODEL_NAME,
+  DEFAULT_MODEL,
+  DEFAULT_PROVIDER,
+  DEFAULT_API_KEY,
+  DEFAULT_API_KEY_TYPE,
 };

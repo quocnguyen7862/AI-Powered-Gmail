@@ -18,6 +18,7 @@ import {
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
   MODEL_URL,
+  MODEL_URL2,
 } from '@environments';
 import { ModelService } from '@/model/model.service';
 import { ChatbotDto } from './dto/chatbot-message.dto';
@@ -56,6 +57,7 @@ export class SummarizeService {
     emailData: EmailMessageDto,
     user: any,
     saveSummary: boolean = true,
+    url_model: string = MODEL_URL,
   ): Promise<any> {
     const cached_summary = await this.getSummarizeById(emailData.messageId);
     if (cached_summary) {
@@ -100,7 +102,7 @@ export class SummarizeService {
         : user.summaryLanguage;
 
       const response = await axios.post(
-        MODEL_URL + 'summarize-email',
+        url_model + 'summarize-email',
         {
           email_data: emailContent,
           attachments: attachments || [],
@@ -236,6 +238,8 @@ export class SummarizeService {
             sessionId: user.sessionId,
             summaryLanguage: user.summaryLanguage,
           },
+          true,
+          MODEL_URL2,
         );
 
         await this.labelService.classifyLabel(
@@ -589,5 +593,9 @@ export class SummarizeService {
     return await this.authService.updateByUserId(user.id, {
       summaryLanguage: language,
     });
+  }
+
+  async deleteSummarizeByUserId(user: any): Promise<any> {
+    return await this.summarizeModel.deleteMany({ userId: user.id });
   }
 }

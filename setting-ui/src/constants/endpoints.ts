@@ -12,3 +12,4 @@ export const URL_SUMMARIZE = "summarize";
 export const URL_RE_SUMMARIZE = "summarize/regenerate";
 export const URL_SUMMARIZE_LANGUAGE = "summarize/language";
 export const URL_TRACKING_STATS = "tracking/stats";
+export const URL_SUMMARIZE_HISTORY = "summarize/history";

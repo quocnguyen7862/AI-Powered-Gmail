@@ -169,4 +169,11 @@ export class SummarizeController {
       parsed.historyId,
     );
   }
+
+  @Delete('history')
+  @Auth()
+  async deleteHistory(@User() user: any): Promise<any> {
+    const result = await this.summarizeService.deleteSummarizeByUserId(user);
+    return result;
+  }
 }
