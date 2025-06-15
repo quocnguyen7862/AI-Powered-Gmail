@@ -54,17 +54,15 @@ jobs:
 
             sudo docker pull siuit/email-ai-server:latest
 
-            sudo docker run -d -p 8001:8001 --restart unless-stopped --name email-ai-server \
+            sudo docker run -d -p 8001:8000 --restart unless-stopped --name email-ai-server \
               -e "REDIS_URL=${{secrets.REDIS_URL}}" \
               -e "OPENAI_API_KEY=${{secrets.OPENAI_API_KEY}}" \
-              -e "PORT=8001" \
               -v /home/azureuser/email-ai-server/user_tokens/:/app/app/user_tokens \
               siuit/email-ai-server:latest
 
-            sudo docker run -d -p 8002:8002 --restart unless-stopped --name email-ai-server-2 \
+            sudo docker run -d -p 8002:8000 --restart unless-stopped --name email-ai-server-2 \
               -e "REDIS_URL=${{secrets.REDIS_URL}}" \
               -e "OPENAI_API_KEY=${{secrets.OPENAI_API_KEY}}" \
-              -e "PORT=8002" \
               -v /home/azureuser/email-ai-server/user_tokens/:/app/app/user_tokens \
               siuit/email-ai-server:latest
 

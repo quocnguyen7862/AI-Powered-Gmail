@@ -11,8 +11,8 @@ COPY ./app ./app
 COPY logging.ini .
 
 # Expose port cho FastAPI
-EXPOSE ${PORT}
+EXPOSE 8000
 
 # Lệnh chạy server (sửa lại nếu app/main.py có tên khác)
-CMD ["sh","-c","uvicorn", "app.main:get_application", "--host", "0.0.0.0", "--port", "${PORT}", "--reload"]
+CMD ["uvicorn", "app.main:get_application", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 # CMD ["gunicorn", "app.main:get_application", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000"]
