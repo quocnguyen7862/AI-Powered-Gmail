@@ -111,18 +111,18 @@ export class AuthService extends BaseService<UserEntity> {
     await this.setupWatch(tokenInfo.userId);
 
     if (!existEmail) {
-      await Promise.all(
-        DEFAULT_LABELS.map(async (label) => {
-          return await this.labelService.createMyLabel(
-            {
-              name: label.name,
-              description: label.description,
-              color: label.color,
-            },
-            tokenInfo.userId,
-          );
-        }),
-      );
+      // await Promise.all(
+      //   DEFAULT_LABELS.map(async (label) => {
+      //     return await this.labelService.createMyLabel(
+      //       {
+      //         name: label.name,
+      //         description: label.description,
+      //         color: label.color,
+      //       },
+      //       tokenInfo.userId,
+      //     );
+      //   }),
+      // );
 
       await this.modelService.createMyModel(
         {
@@ -131,6 +131,7 @@ export class AuthService extends BaseService<UserEntity> {
           model: DEFAULT_MODEL,
           apiKey: 'Free',
           apiKeyType: DEFAULT_API_KEY_TYPE,
+          isSelected: true,
         },
         tokenInfo.userId,
       );

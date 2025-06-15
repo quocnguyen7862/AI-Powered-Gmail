@@ -56,6 +56,7 @@ export class ModelService extends BaseService<ModelEntity> {
       model: createDto.model,
       apiKey: createDto.apiKey,
       apiKeyType: createDto.apiKeyType,
+      isSelected: createDto.isSelected,
     });
     return await this.modelRepo.save(entity);
   }

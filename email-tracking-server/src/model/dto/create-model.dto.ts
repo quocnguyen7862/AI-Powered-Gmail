@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 export class CreateModelDto {
   @IsString()
@@ -21,4 +21,9 @@ export class CreateModelDto {
   @IsString()
   @ApiProperty()
   apiKeyType: string;
+
+  @IsBoolean()
+  @IsOptional()
+  @ApiProperty({ required: false })
+  isSelected?: boolean;
 }

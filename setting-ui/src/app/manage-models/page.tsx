@@ -447,7 +447,9 @@ const MagageModels: React.FC = () => {
                         </td>
                         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                           <p className="text-ellipsis text-nowrap text-black dark:text-white">
-                            {maskApiKey(item.key)}
+                            {item.key !== "Free"
+                              ? maskApiKey(item.key)
+                              : item.key}
                           </p>
                         </td>
                         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
@@ -464,8 +466,9 @@ const MagageModels: React.FC = () => {
                         <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                           <div className="flex items-center space-x-3.5">
                             <button
-                              className="hover:text-primary"
+                              className="hover:text-primary disabled:text-gray-400"
                               onClick={() => handleEdit(item)}
+                              disabled={item.key === "Free"}
                             >
                               <svg
                                 className="fill-current"
@@ -483,12 +486,13 @@ const MagageModels: React.FC = () => {
                               </svg>
                             </button>
                             <button
-                              className="hover:text-red-600"
+                              className="hover:text-red-600 disabled:text-gray-400"
                               onClick={() => {
                                 setModelId(item.id);
                                 setOpen(true);
                                 setDeleteKey(item.key);
                               }}
+                              disabled={item.key === "Free"}
                             >
                               <svg
                                 className="fill-current"

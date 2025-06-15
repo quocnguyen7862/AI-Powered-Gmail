@@ -12,7 +12,7 @@ from app.helpers.email_state import EmailState
 def create_agent_graph(model_name: str = 'gpt-4o-mini',api_key_type='OPENAI_API_KEY', api_key:str='',model_provider:str='openai') -> StateGraph:
     # Initialize agents
     os.environ[api_key_type] = api_key
-    llm = init_chat_model(model_name,model_provider=model_provider)
+    llm = init_chat_model(model_name,model_provider=model_provider,temperature=0.4)
     extract_email = ExtractEmailAgent(llm)
     summarize_email = SummarizeEmailAgent(llm)
     summarize_attachments = SummarizeAttachmentsAgent(llm)
