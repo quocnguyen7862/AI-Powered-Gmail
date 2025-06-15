@@ -54,7 +54,7 @@ export class LabelService extends BaseService<LabelEntity> {
     try {
       const labels = await this.findMyAll(user.id);
       const labelNames = labels.map(
-        (label) => `${label.name}:${label.description}`,
+        (label) => `${label.name}: ${label.description}`,
       );
 
       const model = await this.modelService.getSelectedByUserId(user.id);

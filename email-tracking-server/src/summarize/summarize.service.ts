@@ -561,8 +561,11 @@ export class SummarizeService {
   async saveSummarize(
     summaryData: CreateSummarizeDto,
   ): Promise<SummarizeEntity> {
-    const createdSummary = new this.summarizeModel(summaryData);
-    return await createdSummary.save();
+    return await this.summarizeModel.findOneAndUpdate(
+      { messageId: summaryData.messageId },
+      summaryData,
+      { new: true, upsert: true },
+    );
   }
 
   async getSummarizeById(id: string): Promise<SummarizeEntity> {
