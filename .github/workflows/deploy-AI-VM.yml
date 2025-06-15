@@ -49,6 +49,9 @@ jobs:
             sudo docker stop email-ai-server || true
             sudo docker rm -f email-ai-server || true
 
+            sudo docker stop email-ai-server-2 || true
+            sudo docker rm -f email-ai-server-2 || true
+
             sudo docker pull siuit/email-ai-server:latest
 
             sudo docker run -d -p 8001:8001 --restart unless-stopped --name email-ai-server \
