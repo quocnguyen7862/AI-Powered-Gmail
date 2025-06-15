@@ -14,5 +14,5 @@ COPY logging.ini .
 EXPOSE ${PORT}
 
 # Lệnh chạy server (sửa lại nếu app/main.py có tên khác)
-CMD ["uvicorn", "app.main:get_application", "--host", "0.0.0.0", "--port", "${PORT}", "--reload"]
+CMD ["sh","-c","uvicorn", "app.main:get_application", "--host", "0.0.0.0", "--port", "${PORT}", "--reload"]
 # CMD ["gunicorn", "app.main:get_application", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000"]
