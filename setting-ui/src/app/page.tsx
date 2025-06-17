@@ -9,21 +9,31 @@ const features = [
     title: "Summarize",
     description:
       "Capture key points from documents in seconds, focusing only on the most important details.",
+    image: "/images/summary.png",
+  },
+  {
+    title: "Translate",
+    description:
+      "Translate summarized emails into your preferred language, making communication easier.",
+    image: "/images/translate.png",
   },
   {
     title: "Compose",
     description:
       "Generate email responses with a single click, saving you time and effort.",
+    image: "/images/compose.png",
   },
   {
-    title: "Translate",
+    title: "Chatbot",
     description:
-      "Translate emails into your preferred language, making communication easier.",
+      "Interact with your emails using a chatbot, allowing for quick and efficient email management.",
+    image: "/images/chatbot.png",
   },
   {
-    title: "Search",
+    title: "Tracking",
     description:
-      "Quickly find specific emails or information within your inbox, improving productivity.",
+      "Track email opens, providing insights into your email engagement.",
+    image: "/images/tracking.png",
   },
 ];
 
@@ -33,7 +43,7 @@ export default function Home() {
   };
   return (
     <>
-      <div className="font-montserrat px-15 py-12 text-black-2">
+      <div className="px-15 py-12 font-montserrat text-black-2">
         <section>
           <div className="flex justify-between">
             <Link className="flex items-center gap-2" href="/">
@@ -125,6 +135,14 @@ export default function Home() {
                 <div className="col-span-3 p-5">
                   <h3 className="my-[15px] text-xl font-bold">{item.title}</h3>
                   <p className="px-[12%]">{item.description}</p>
+                </div>
+                <div className="col-span-7 flex justify-center">
+                  <img
+                    width="70%"
+                    height="70%"
+                    src={item.image}
+                    alt={item.title}
+                  />
                 </div>
               </div>
             );

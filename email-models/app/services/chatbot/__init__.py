@@ -6,6 +6,8 @@ from langchain_community.tools.gmail.utils import build_resource_service
 from langchain_community.tools.gmail.create_draft import GmailCreateDraft
 from langchain_community.tools.gmail.get_message import GmailGetMessage
 from langchain_community.tools.gmail.get_thread import GmailGetThread
+from langchain_community.tools.gmail.send_message import GmailSendMessage
+from langchain_community.tools.gmail.search import GmailSearch
 from langgraph.store.redis import RedisStore
 from langgraph.store.base import BaseStore
 from langgraph.checkpoint.redis import RedisSaver
@@ -19,13 +21,13 @@ from app.helpers.gmail_create_label import GmailCreateLabel
 from app.helpers.gmail_delete_email import GmailTrashThread,GmailUntrashThread
 from app.helpers.gmail_delete_label import GmailDeleteLabel
 from app.helpers.gmail_list_label import GmailListLabels
-from app.helpers.gmail_send_email import GmailSendEmail
+# from app.helpers.gmail_send_email import GmailSendEmail
 from app.helpers.gmail_unassign_label import GmailRemoveLabelByName
 from app.helpers.gmail_get_attachment import GmailReadAttachment
 from app.helpers.gmail_get_draft import GmailGetDraft
 from app.helpers.gmail_list_draft import GmailListDrafts
 from app.helpers.gmail_update_draft import GmailUpdateDraft
-from app.helpers.gmail_search import GmailSearch
+# from app.helpers.gmail_search import GmailSearch
 
 with (RedisStore.from_conn_string(REDIS_URL) as store,
       RedisSaver.from_conn_string(REDIS_URL) as checkpointer):
@@ -47,7 +49,7 @@ with (RedisStore.from_conn_string(REDIS_URL) as store,
             GmailTrashThread(api_resource=api_resource),
             GmailDeleteLabel(api_resource=api_resource),
             GmailListLabels(api_resource=api_resource),
-            GmailSendEmail(api_resource=api_resource),
+            GmailSendMessage(api_resource=api_resource),
             GmailRemoveLabelByName(api_resource=api_resource),
             GmailReadAttachment(api_resource=api_resource),
             GmailGetDraft(api_resource=api_resource),
