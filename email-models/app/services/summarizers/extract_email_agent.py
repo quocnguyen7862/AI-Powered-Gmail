@@ -40,7 +40,7 @@ class ExtractEmailAgent:
         document=Document(page_content=state['email_text'], metadata={})
         documents= [document]
         converted_docs  = md.transform_documents(documents)
-        result = self.llm_chain.invoke({"text": state['email_text']})
+        result = self.llm_chain.invoke({"text": converted_docs})
 
         state['email_extracted']=result
         state['current_agent']="ExtractMainText"

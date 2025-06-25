@@ -39,7 +39,7 @@ export class SummarizeService {
   ) {}
 
   private extractContentFromEmail(payload: any): string {
-    if (payload.body && payload.body.data) {
+    if (payload.body && payload.body.data && payload.mimeType === 'text/html') {
       return payload.body.data;
     }
 
