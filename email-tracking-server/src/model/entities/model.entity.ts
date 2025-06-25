@@ -16,7 +16,7 @@ export class ModelEntity extends BaseEntity {
   @Column()
   modelProvider: string;
 
-  @Column({ unique: true })
+  @Column()
   apiKey: string;
 
   @Column()
